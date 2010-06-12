@@ -2,8 +2,9 @@ use strict;
 use warnings;
 use File::Spec;
 
-use Test::More tests => 16;
+use Test::More tests => 22; # +3
 use ZeroMQ qw/:all/;
+use Storable qw/nfreeze thaw/;
 
 pass();
 
@@ -43,13 +44,31 @@ pass();
   ok(!defined($sock->recv(ZMQ_NOBLOCK)));
   ok($client->send( ZeroMQ::Message->new("Talk to me") ));
   
-  # FIXME find otu why these are throwing exceptions...
+  # FIXME find out why these are throwing exceptions...
   #ok(!$sock->getsockopt(ZMQ_RCVMORE), "no ZMQ_RCVMORE set");
   #ok($sock->getsockopt(ZMQ_AFFINITY) == 0, "no ZMQ_AFFINITY");
   #ok($sock->getsockopt(ZMQ_RATE) == 100, "ZMQ_RATE is at default 100");
 
   my $msg = $sock->recv();
   ok(defined $msg, "received defined msg");
+  is($msg->data, "Talk to me", "received correct message");
+
+  # now test with objects, just for kicks.
+
+  my $obj = {
+    foo => 'bar',
+    baz => [1..9],
+    blah => 'blubb',
+  };
+  my $frozen = nfreeze($obj);
+  ok($client->send( ZeroMQ::Message->new($frozen) ));
+  $msg = $sock->recv();
+  ok(defined $msg, "received defined msg");
+  isa_ok($msg, 'ZeroMQ::Message');
+  is($msg->data(), $frozen, "got back same data");
+  my $robj = thaw($msg->data);
+  is_deeply($robj, $obj);
+
 }
 pass();
 
