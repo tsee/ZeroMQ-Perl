@@ -15,7 +15,7 @@ WriteMakefile(
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM  => 'lib/ZeroMQ.pm', # retrieve abstract from module
        AUTHOR         => 'Steffen Mueller <smueller@cpan.org>') : ()),
-    LIBS              => ['-zmq'], # e.g., '-lm'
+    LIBS              => ['-lzmq'], # e.g., '-lm'
     DEFINE            => '-O2', # e.g., '-DHAVE_SOMETHING'
     INC               => '-I.', # e.g., '-I. -I/usr/include/other'
      OBJECT            => '$(O_FILES)', # link all the C files too

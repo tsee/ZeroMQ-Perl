@@ -1,19 +1,26 @@
 
-
 %module{ZeroMQ};
 
 // catch the error_t exceptions with a helpful message
-%exception{ZMQException}{error_t}{stdmessage};
+%exception{ZMQException}{zmq::error_t}{stdmessage};
 
-%name{ZeroMQ::Msg} class message_t %catch{ZMQException}
+%name{ZeroMQ::Message} class message_t %catch{ZMQException}
 {
-  %name{new} message_t();
+  %name{new} message_t(char* data, size_t %length{data})
+    %code{%
+      /* Note: we need to copy data and provide a cleanup function */
+      RETVAL = new zmq::message_t(data, length(data), NULL); 
+    %};
+  //%name{new} message_t();
   //%name{new} message_t(size_t size_);
-  //%name{new} message_t(void *data, size_t size_, free_fn *ffn_, void *hint_ = NULL);
+  //%name{new} message_t(MsgData* data, size_t size_, free_fn *ffn_, void *hint_ = NULL);
   ~message_t();
 
   size_t size();
-  char* data();
+  
+  //MsgData* data();
+  char* data()
+    %code{% RETVAL = (char*)THIS->data(); %};
 };
 
 

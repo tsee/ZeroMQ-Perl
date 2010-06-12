@@ -1,4 +1,6 @@
-Example*	O_OBJECT
+message_t*	O_OBJECT
+error_t*	O_OBJECT
+size_t			T_UV
 std::string*			T_STRINGPTR
 std::string			T_STRING
 
