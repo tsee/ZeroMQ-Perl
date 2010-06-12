@@ -1,4 +1,5 @@
 %typemap{size_t}{simple};
+%typemap{STRLEN}{simple};
 %typemap{std::string}{simple};
 %typemap{std::string&}{reference};
 %typemap{bool}{simple};

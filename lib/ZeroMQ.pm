@@ -22,6 +22,22 @@ our %EXPORT_TAGS = ( 'all' => [
   qw(
       ZMQ_NOBLOCK
   ),
+# get/setsockopt options
+  qw(
+    ZMQ_RCVMORE
+    ZMQ_HWM
+    ZMQ_SWAP
+    ZMQ_AFFINITY
+    ZMQ_IDENTITY
+    ZMQ_RATE
+    ZMQ_RECOVERY_IVL
+    ZMQ_MCAST_LOOP
+    ZMQ_SNDBUF
+    ZMQ_RCVBUF
+
+    ZMQ_SUBSCRIBE
+    ZMQ_UNSUBSCRIBE
+  ),
 ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
