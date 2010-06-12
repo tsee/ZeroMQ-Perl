@@ -1,0 +1,19 @@
+
+
+%module{ZeroMQ};
+
+// catch the error_t exceptions with a helpful message
+%exception{ZMQException}{error_t}{stdmessage};
+
+%name{ZeroMQ::Msg} class message_t %catch{ZMQException}
+{
+  %name{new} message_t();
+  //%name{new} message_t(size_t size_);
+  //%name{new} message_t(void *data, size_t size_, free_fn *ffn_, void *hint_ = NULL);
+  ~message_t();
+
+  size_t size();
+  char* data();
+};
+
+
