@@ -7,7 +7,9 @@ my $CC = 'g++';
 
 WriteConstants(
   NAME => 'ZeroMQ',
-  NAMES => [qw(
+  NAMES => [
+# socket types
+  qw(
     ZMQ_REQ ZMQ_REP
 
     ZMQ_PUB ZMQ_SUB
@@ -15,7 +17,12 @@ WriteConstants(
     ZMQ_DOWNSTREAM ZMQ_UPSTREAM
 
     ZMQ_PAIR
-  )],
+  ),
+# socket recv flags
+  qw(
+      ZMQ_NOBLOCK
+  ),
+  ],
 );
 
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence

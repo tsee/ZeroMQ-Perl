@@ -24,8 +24,28 @@ class socket_t
   //void socket_t::setsockopt(int option_name, const void *option_value, size_t option_len)
 
   void bind(char* endpoint);
-  void connect(const char *endpoint);
+  void connect(char* endpoint);
+  bool send(message_t& msg, int flags = 0);
 
+  //bool recv(message_t* msg, int flags = 0);
+  // FIXME needs exception handling...
+  {%
+
+void
+socket_t::recv(flags = 0)
+    int flags;
+  PPCODE:
+    message_t* rv = new message_t();
+    if (!THIS->recv(rv, flags)) {
+      delete rv;
+      XPUSHs(&PL_sv_undef);
+    }
+    else {
+      XPUSHmortal;
+      sv_setref_pv(ST(0), "ZeroMQ::Message", (void*)rv);
+    }
+
+  %}
 };
 
 

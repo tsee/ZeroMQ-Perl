@@ -7,15 +7,22 @@ use Carp 'croak';
 our $VERSION = '0.01';
 our @ISA = qw(Exporter);
 
-our %EXPORT_TAGS = ( 'all' => [ qw(
-  ZMQ_REQ ZMQ_REP
+our %EXPORT_TAGS = ( 'all' => [
+# socket types
+  qw(
+    ZMQ_REQ ZMQ_REP
 
-  ZMQ_PUB ZMQ_SUB
+    ZMQ_PUB ZMQ_SUB
 
-  ZMQ_DOWNSTREAM ZMQ_UPSTREAM
+    ZMQ_DOWNSTREAM ZMQ_UPSTREAM
 
-  ZMQ_PAIR
-) ] );
+    ZMQ_PAIR
+  ),
+# socket recv flags
+  qw(
+      ZMQ_NOBLOCK
+  ),
+] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw();
