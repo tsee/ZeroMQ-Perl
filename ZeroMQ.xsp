@@ -36,15 +36,24 @@ socket_t::recv(flags = 0)
     int flags;
   PPCODE:
     message_t* rv = new message_t();
-    if (!THIS->recv(rv, flags)) {
+    try {
+      if (!THIS->recv(rv, flags)) {
+        delete rv;
+        XPUSHs(&PL_sv_undef);
+      }
+      else {
+        XPUSHmortal;
+        sv_setref_pv(ST(0), "ZeroMQ::Message", (void*)rv);
+      }
+    }
+    catch (zmq::error_t& e) {
       delete rv;
-      XPUSHs(&PL_sv_undef);
+      croak("Caught C++ exception of type or derived from 'zmq::error_t': %s", e.what());
     }
-    else {
-      XPUSHmortal;
-      sv_setref_pv(ST(0), "ZeroMQ::Message", (void*)rv);
+    catch (...) {
+      delete rv;
+      croak("Caught C++ exception of unknown type");
     }
-
   %}
 };
 
