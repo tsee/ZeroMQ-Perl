@@ -4,7 +4,27 @@
 // catch the error_t exceptions with a helpful message
 %exception{ZMQException}{zmq::error_t}{stdmessage};
 
-%name{ZeroMQ::Message} class message_t %catch{ZMQException}
+%name{ZeroMQ::Context}
+class context_t
+  %catch{ZMQException}
+{
+  %name{new} context_t(int io_threads);
+  ~context_t();
+};
+
+
+%name{ZeroMQ::Socket}
+class socket_t
+  %catch{ZMQException}
+{
+  %name{new} socket_t(context_t& context, int type);
+  ~socket_t();
+};
+
+
+%name{ZeroMQ::Message}
+class message_t
+  %catch{ZMQException}
 {
   %name{new} message_t(char* data, size_t %length{data})
     %code{%

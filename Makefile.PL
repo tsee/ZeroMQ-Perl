@@ -1,8 +1,22 @@
 use 5.008;
 use ExtUtils::MakeMaker;
+use ExtUtils::Constant 'WriteConstants';
 use File::Spec;
 
 my $CC = 'g++';
+
+WriteConstants(
+  NAME => 'ZeroMQ',
+  NAMES => [qw(
+    ZMQ_REQ ZMQ_REP
+
+    ZMQ_PUB ZMQ_SUB
+
+    ZMQ_DOWNSTREAM ZMQ_UPSTREAM
+
+    ZMQ_PAIR
+  )],
+);
 
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
@@ -23,10 +37,15 @@ WriteMakefile(
     'TYPEMAPS'          => ['perlobject.map'],
     'CC'                => $CC,
     'LD'                => '$(CC)',
-    META_MERGE => { no_index => { directory => 'buildtools', }, },
-    #clean => {
-    #  FILES => "",
-    #},
+    META_MERGE => {
+    #  no_index => { directory => 'buildtools', },
+      configure_requires => {
+        'ExtUtils::Constant' => '0',
+      },
+    },
+    clean => {
+      FILES => "const-*.inc",
+    },
 );
 
 
