@@ -40,3 +40,9 @@
 #   Mac OSX SMB mount metadata files
 \B\._
 
+
+
+
+
+\bconst-\w+\.inc$
+
