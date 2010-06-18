@@ -5,7 +5,7 @@ use File::Spec;
 
 my $CC = 'g++';
 
-WriteConstants(
+WriteConstants( # NOTE: keep this in sync with lib/ZeroMQ.pm
   NAME => 'ZeroMQ',
   NAMES => [
 # socket types
@@ -47,7 +47,7 @@ WriteMakefile(
     NAME              => 'ZeroMQ',
     VERSION_FROM      => 'lib/ZeroMQ.pm', # finds $VERSION
     PREREQ_PM         => {
-      'ExtUtils::XSpp' => '0.11',
+      'ExtUtils::XSpp' => '0.11_02',
       'Storable' => '0',
     },
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
