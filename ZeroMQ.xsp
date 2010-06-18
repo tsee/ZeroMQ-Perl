@@ -1,5 +1,6 @@
 
 %module{ZeroMQ};
+%loadplugin{Cloning};
 
 // catch the error_t exceptions with a helpful message
 %exception{ZMQException}{zmq::error_t}{stdmessage};
@@ -9,6 +10,7 @@
 class context_t
   %catch{ZMQException}
 {
+  %PreventCloning;
   %name{new} context_t(int io_threads);
   ~context_t();
 };
@@ -19,6 +21,7 @@ class context_t
 class socket_t
   %catch{ZMQException}
 {
+  %PreventCloning;
   %name{new} socket_t(context_t& context, int type);
   ~socket_t();
 
@@ -151,6 +154,7 @@ socket_t::recv(flags = 0)
 class message_t
   %catch{ZMQException}
 {
+  %PreventCloning;
   %name{new} message_t(char* data, size_t %length{data})
     %code{%
       /* Note: we need to copy data and provide a cleanup function */
