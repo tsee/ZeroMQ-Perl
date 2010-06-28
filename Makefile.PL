@@ -1,9 +1,10 @@
 use 5.008;
 use ExtUtils::MakeMaker;
 use ExtUtils::Constant 'WriteConstants';
+use ExtUtils::CppGuess;
 use File::Spec;
 
-my $CC = 'g++';
+my $guess = ExtUtils::CppGuess->new;
 
 WriteConstants( # NOTE: keep this in sync with lib/ZeroMQ.pm
   NAME => 'ZeroMQ',
@@ -50,6 +51,7 @@ WriteMakefile(
       'ExtUtils::XSpp' => '0.11_02',
       'ExtUtils::XSpp::Plugin::Cloning' => '0.01',
       'Storable' => '0',
+      'ExtUtils::CppGuess' => '0.01',
     },
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM  => 'lib/ZeroMQ.pm', # retrieve abstract from module
@@ -58,16 +60,16 @@ WriteMakefile(
     DEFINE            => '-O2', # e.g., '-DHAVE_SOMETHING'
     INC               => '-I.', # e.g., '-I. -I/usr/include/other'
      OBJECT            => '$(O_FILES)', # link all the C files too
-    'XSOPT'             => '-C++ -hiertype',
+    #'XSOPT'             => '-C++ -hiertype',
     'TYPEMAPS'          => ['perlobject.map'],
-    'CC'                => $CC,
-    'LD'                => '$(CC)',
     META_MERGE => {
     #  no_index => { directory => 'buildtools', },
       configure_requires => {
         'ExtUtils::Constant' => '0',
+        'ExtUtils::CppGuess' => '0.01',
       },
     },
+    $guess->makemaker_options,
     clean => {
       FILES => "const-*.inc",
     },
