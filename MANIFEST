@@ -1,0 +1,14 @@
+Build.PL
+lib/ZeroMQ.pm
+MANIFEST			This list of files
+MANIFEST.SKIP
+src/myinit.h
+src/ppport.h
+t/01basic.t
+t/02threads.t
+xsp/my.map
+xsp/typemap.xsp
+xsp/ZeroMQ.xsp
+xt/local_lat.pl
+xt/remote_lat.pl
+xt/thread_0mq.pl

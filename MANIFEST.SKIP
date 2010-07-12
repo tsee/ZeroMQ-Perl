@@ -47,3 +47,4 @@
 
 \bconst-\w+\.inc$
 
+^MYMETA.yml$
