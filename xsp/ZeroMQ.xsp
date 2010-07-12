@@ -1,5 +1,15 @@
 
 %module{ZeroMQ};
+%package{ZeroMQ};
+
+%{
+
+#include <myinit.h>
+
+INCLUDE: const-xs.inc
+
+%}
+
 %loadplugin{Cloning};
 
 // catch the error_t exceptions with a helpful message

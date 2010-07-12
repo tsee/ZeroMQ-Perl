@@ -40,8 +40,9 @@
 #   Mac OSX SMB mount metadata files
 \B\._
 
-
-
+\bbuildtmp\b
+\.git\b
+\.gitignore\b
 
 
 \bconst-\w+\.inc$
