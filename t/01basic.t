@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use File::Spec;
 
-use Test::More tests => 22; # +3
+use Test::More tests => 25;
 use ZeroMQ qw/:all/;
 use Storable qw/nfreeze thaw/;
 
@@ -44,10 +44,9 @@ pass();
   ok(!defined($sock->recv(ZMQ_NOBLOCK)));
   ok($client->send( ZeroMQ::Message->new("Talk to me") ));
   
-  # FIXME find out why these are throwing exceptions...
-  #ok(!$sock->getsockopt(ZMQ_RCVMORE), "no ZMQ_RCVMORE set");
-  #ok($sock->getsockopt(ZMQ_AFFINITY) == 0, "no ZMQ_AFFINITY");
-  #ok($sock->getsockopt(ZMQ_RATE) == 100, "ZMQ_RATE is at default 100");
+  ok(!$sock->getsockopt(ZMQ_RCVMORE), "no ZMQ_RCVMORE set");
+  ok($sock->getsockopt(ZMQ_AFFINITY) == 0, "no ZMQ_AFFINITY");
+  ok($sock->getsockopt(ZMQ_RATE) == 100, "ZMQ_RATE is at default 100");
 
   my $msg = $sock->recv();
   ok(defined $msg, "received defined msg");
