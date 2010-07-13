@@ -1,0 +1,18 @@
+%loadplugin{Cloning};
+
+%module{ZeroMQ};
+%package{ZeroMQ};
+
+%{
+#include <myinit.h>
+%}
+
+%name{ZeroMQ::Context}
+class context_t
+  %catch{ZMQException}
+{
+  %PreventCloning;
+  %name{new} context_t(int io_threads = 1);
+  ~context_t();
+};
+

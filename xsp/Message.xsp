@@ -1,0 +1,33 @@
+%loadplugin{Cloning};
+
+%module{ZeroMQ};
+%package{ZeroMQ};
+
+%{
+#include <myinit.h>
+%}
+
+
+
+%name{ZeroMQ::Message}
+class message_t
+  %catch{ZMQException}
+{
+  %PreventCloning;
+  %name{new} message_t(char* data, size_t %length{data})
+    %code{%
+      /* Note: we need to copy data and provide a cleanup function */
+      RETVAL = new zmq::message_t(data, length(data), NULL); 
+    %};
+  ~message_t();
+
+  size_t size();
+  
+  %{
+void
+message_t::data()
+  PPCODE:
+    XPUSHs(sv_2mortal(newSVpv((char*)THIS->data(), THIS->size())));
+  %}
+};
+
