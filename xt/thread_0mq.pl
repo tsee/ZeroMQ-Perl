@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use Config;
 
+use Time::HiRes qw/sleep time/;
 use ZeroMQ qw/:all/;
 
 BEGIN {
@@ -29,7 +30,7 @@ my $local_thr = threads->create( \&local );
 sub local {
   my $cxt = ZeroMQ::Context->new(1);
   my $sock = ZeroMQ::Socket->new( $cxt, ZMQ_REP );
-  print "[local] Trying to start at $addr \n";
+  print "[local]  Trying to start at $addr \n";
 
   $sock->bind($addr);
   my $msg;
@@ -41,28 +42,28 @@ sub local {
   }
 }
 
+sleep 0.1;
 my $remote_thr = threads->create( \&remote );
 
 sub remote {
   my $cxt = ZeroMQ::Context->new(1);
   my $sock = ZeroMQ::Socket->new( $cxt, ZMQ_REQ );
-  print "[remote]Trying to start at $addr \n";
 
-  sleep 1;
+  print "[remote] Trying to start at $addr \n";
   $sock->connect($addr);
   my $text = '0' x $msg_size;
   my $msg  = ZeroMQ::Message->new($text);
 
   my $before = time();
   foreach ( 1 .. $roundtrip_count ) {
-
     #warn "$_\n" if (not $_ % 1000);
     $sock->send($msg);
     $msg = $sock->recv();
     die "Bad size" if $msg->size() != $msg_size;
   }
   my $after = time();
-  my $latency = ( $after - $before ) / ( $roundtrip_count * 2 ) * 1.e6;
+  my $latency = ($after - $before) / ( $roundtrip_count * 2 ) * 1.e6;
+  print "Latency: $latency us\n";
 }
 
 END {
