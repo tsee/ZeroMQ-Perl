@@ -57,14 +57,15 @@ sub AUTOLOAD {
     our $AUTOLOAD;
 
     ($constname = $AUTOLOAD) =~ s/.*:://;
-    croak "&ZeroMQ::constant not defined" if $constname eq 'constant';
+    croak("&ZeroMQ::constant not defined")
+      if $constname eq 'constant';
     my ($error, $val) = constant($constname);
     if ($error) {
 	if ($error =~  /is not a valid/) {
 	    $AutoLoader::AUTOLOAD = $AUTOLOAD;
 	    goto &AutoLoader::AUTOLOAD;
 	} else {
-	    croak $error;
+	    croak($error);
 	}
     }
     {
