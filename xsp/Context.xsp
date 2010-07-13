@@ -1,11 +1,6 @@
 %loadplugin{Cloning};
 
 %module{ZeroMQ};
-%package{ZeroMQ};
-
-%{
-#include <myinit.h>
-%}
 
 %name{ZeroMQ::Context}
 class context_t
