@@ -21,7 +21,7 @@ class context_t
   %catch{ZMQException}
 {
   %PreventCloning;
-  %name{new} context_t(int io_threads);
+  %name{new} context_t(int io_threads = 1);
   ~context_t();
 };
 
