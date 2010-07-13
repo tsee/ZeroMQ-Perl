@@ -15,20 +15,20 @@ pass();
 pass();
 
 {
-  my $cxt = ZeroMQ::Context->new(1);
+  my $cxt = ZeroMQ::Context->new;
   isa_ok($cxt, 'ZeroMQ::Context');
 }
 pass();
 
 
 {
-  my $cxt = ZeroMQ::Context->new(1); # must be 0 theads for in-process bind
+  my $cxt = ZeroMQ::Context->new;
   isa_ok($cxt, 'ZeroMQ::Context');
   my $sock = ZeroMQ::Socket->new($cxt, ZMQ_UPSTREAM); # Receiver
   isa_ok($sock, 'ZeroMQ::Socket');
 
   { # too early, server socket not created:
-    my $cxt = ZeroMQ::Context->new(0); # must be 0 theads for in-process bind
+    my $cxt = ZeroMQ::Context->new(1);
     my $client = ZeroMQ::Socket->new($cxt, ZMQ_DOWNSTREAM); # sender
     eval { $client->connect("inproc://myPrivateSocket"); };
     ok($@ && "$@" =~ /Connection refused/);
@@ -68,7 +68,6 @@ pass();
   is($msg->data(), $frozen, "got back same data");
   my $robj = thaw($msg->data);
   is_deeply($robj, $obj);
-
 }
 pass();
 
