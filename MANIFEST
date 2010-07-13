@@ -16,3 +16,4 @@ xsp/ZeroMQ.xsp
 xt/local_lat.pl
 xt/remote_lat.pl
 xt/thread_0mq.pl
+META.yml
