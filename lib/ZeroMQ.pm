@@ -7,6 +7,7 @@ use Carp 'croak';
 our $VERSION = '0.01';
 our @ISA = qw(Exporter);
 
+# TODO: keep in sync with docs below and Build.PL
 our %EXPORT_TAGS = ( 'all' => [
 # socket types
   qw(
@@ -88,9 +89,96 @@ __END__
 
 ZeroMQ - A ZeroMQ2 wrapper for Perl
 
+=head1 SYNOPSIS
+
+  use ZeroMQ qw/:all/;
+  
+  my $cxt = ZeroMQ::Context->new;
+  my $sock = ZeroMQ::Socket->new($cxt, ZMQ_REP);
+  $sock->bind($addr);
+  
+  my $msg;
+  foreach (1..$roundtrip_count) {
+    $msg = $sock->recv();
+    die "Bad size" if $msg->size() != $msg_size;
+    $sock->send($msg);
+  }
+
+See the F<xt/> directory for full examples.
+
+=head1 DESCRIPTION
+
+The C<ZeroMQ> module is a wrapper of the 0MQ message
+passing library for Perl. It's a thin wrapper around the
+C++ API.
+
+Loading C<ZeroMQ> will make the L<ZeroMQ::Context>,
+L<ZeroMQ::Socket>, and L<ZeroMQ::Message> classes available
+as well.
+
+=head2 EXPORTS
+
+You may choose to import one or more (using the C<:all> import tag)
+constants into your namespace by supplying arguments to the
+C<use ZeroMQ> call as shown in the synopsis above.
+
+The exportable constants are:
+
+=over 2
+
+=item *
+
+Socket types
+  
+    ZMQ_REQ ZMQ_REP
+    ZMQ_PUB ZMQ_SUB
+    ZMQ_DOWNSTREAM ZMQ_UPSTREAM
+    ZMQ_PAIR
+
+=item *
+
+Socket recv flags
+
+      ZMQ_NOBLOCK
+
+=item *
+
+get/setsockopt options
+
+    ZMQ_RCVMORE
+    ZMQ_HWM
+    ZMQ_SWAP
+    ZMQ_AFFINITY
+    ZMQ_IDENTITY
+    ZMQ_RATE
+    ZMQ_RECOVERY_IVL
+    ZMQ_MCAST_LOOP
+    ZMQ_SNDBUF
+    ZMQ_RCVBUF
+
+    ZMQ_SUBSCRIBE
+    ZMQ_UNSUBSCRIBE
+
+=back
+
+=head1 CAVEATS
+
+This is an early release. Proceed with caution, please report
+(or better yet: fix) bugs you encounter. Tested againt 0MQ 2.0.7.
+
+Use of the C<inproc://> transport layer doesn't seem to work
+between two perl ithreads. This may be due to the fact that right now,
+context aren't shared between ithreads and C<inproc> works
+only within a single context. Try another transport layer until
+contexts can be shared.
+
 =head1 SEE ALSO
 
-L<ExtUtils::XSpp>
+L<ZeroMQ::Context>, L<ZeroMQ::Socket>, L<ZeroMQ::Message>
+
+L<http://zeromq.org>
+
+L<ExtUtils::XSpp>, L<Module::Build::WithXSpp>
 
 =head1 AUTHOR
 
