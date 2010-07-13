@@ -40,8 +40,8 @@ void
 socket_t::getsockopt(option_name)
     int option_name;
   PPCODE:
-    dTARG;
-    size_t len = 0;
+    dXSTARG;
+    size_t len = sizeof(int64_t);
     try {
       switch (option_name) {
       case ZMQ_RCVMORE:
@@ -49,30 +49,37 @@ socket_t::getsockopt(option_name)
       case ZMQ_SWAP:
       case ZMQ_AFFINITY:
         {
-          int64_t rv;
+          int64_t rv = 123;
           THIS->getsockopt(option_name, (void*)&rv, &len);
           XPUSHi((IV)rv);
         }
+        break;
       case ZMQ_IDENTITY:
         {
           void* rv;
           Newx(rv, 255, char);
+          len = 255;
           THIS->getsockopt(option_name, (void*)&rv, &len);
           XPUSHs(sv_2mortal(newSVpv((char*)rv, len)));
           Safefree(rv);
         }
+        break;
       case ZMQ_RATE:
       case ZMQ_RECOVERY_IVL:
       case ZMQ_MCAST_LOOP:
       case ZMQ_SNDBUF:
       case ZMQ_RCVBUF:
         {
-          uint64_t rv;
+          uint64_t rv = 123;
+          // Note: sizeof(uint64_t) == sizeof(int64_t) so this isn't strictly necessary:
+          len = sizeof(uint64_t);
           THIS->getsockopt(option_name, (void*)&rv, &len);
           XPUSHu((UV)rv);
         }
+        break;
       default: 
         XPUSHs(&PL_sv_undef);
+        break;
       };
     } /* end try */
     catch (zmq::error_t& e) {
@@ -86,7 +93,7 @@ socket_t::getsockopt(option_name)
   void
   setsockopt(int option_name, char* option_value, size_t %length{option_value})
     %code{%
-      dTARG;
+      dXSTARG;
       try {
         switch (option_name) {
         case ZMQ_HWM:
@@ -96,12 +103,14 @@ socket_t::getsockopt(option_name)
             int64_t v = atoi(option_value);
             THIS->setsockopt(option_name, (void*)&v, sizeof(int64_t));
           }
+          break;
         case ZMQ_IDENTITY:
         case ZMQ_SUBSCRIBE:
         case ZMQ_UNSUBSCRIBE:
           {
             THIS->setsockopt(option_name, (void*)option_value, length(option_value));
           }
+          break;
         case ZMQ_RATE:
         case ZMQ_RECOVERY_IVL:
         case ZMQ_MCAST_LOOP:
@@ -111,6 +120,7 @@ socket_t::getsockopt(option_name)
             uint64_t v = atoi(option_value);
             THIS->setsockopt(option_name, (void*)&v, sizeof(uint64_t));
           }
+          break;
         //default:
           /*throw zmq::error_t(); // reads errnum...*/
         };
