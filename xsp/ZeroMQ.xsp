@@ -15,7 +15,7 @@ INCLUDE: const-xs.inc
 // catch the error_t exceptions with a helpful message
 %exception{ZMQException}{zmq::error_t}{stdmessage};
 
-/////////////////////////////////////////////////////////////////////////
+
 %name{ZeroMQ::Context}
 class context_t
   %catch{ZMQException}
@@ -26,7 +26,7 @@ class context_t
 };
 
 
-/////////////////////////////////////////////////////////////////////////
+
 %name{ZeroMQ::Socket}
 class socket_t
   %catch{ZMQException}
@@ -34,6 +34,10 @@ class socket_t
   %PreventCloning;
   %name{new} socket_t(context_t& context, int type);
   ~socket_t();
+
+  void bind(char* endpoint);
+  void connect(char* endpoint);
+  bool send(message_t& msg, int flags = 0);
 
   %{
 void
@@ -134,10 +138,6 @@ socket_t::getsockopt(option_name)
     %};
   //void socket_t::setsockopt(int option_name, const void *option_value, size_t option_len)
 
-  void bind(char* endpoint);
-  void connect(char* endpoint);
-  bool send(message_t& msg, int flags = 0);
-
   //bool recv(message_t* msg, int flags = 0);
   // FIXME needs exception handling...
   {%
@@ -169,7 +169,7 @@ socket_t::recv(flags = 0)
 };
 
 
-/////////////////////////////////////////////////////////////////////////
+
 %name{ZeroMQ::Message}
 class message_t
   %catch{ZMQException}
