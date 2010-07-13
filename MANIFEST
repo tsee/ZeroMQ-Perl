@@ -1,5 +1,9 @@
 Build.PL
+Changes
 lib/ZeroMQ.pm
+lib/ZeroMQ/Context.pod
+lib/ZeroMQ/Message.pod
+lib/ZeroMQ/Socket.pod
 MANIFEST			This list of files
 MANIFEST.SKIP
 src/myinit.h
