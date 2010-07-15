@@ -48,12 +48,10 @@ my $build = Module::Build::WithXSpp->new(
   module_name            => 'ZeroMQ',
   license                => 'perl',
   requires               => {
-    'ExtUtils::XSpp'                  => '0.12',
     'ExtUtils::XSpp::Plugin::Cloning' => '0.01',
     'Storable'                        => '0',
   },
   build_requires         => {
-    'ExtUtils::XSpp'                  => '0.12',
     'ExtUtils::XSpp::Plugin::Cloning' => '0.01',
   },
   configure_requires     => {
@@ -61,7 +59,9 @@ my $build = Module::Build::WithXSpp->new(
   },
   # Provides extra C typemaps for opaque objects:
   extra_typemap_modules  => {
-    'ExtUtils::Typemap::ObjectMap'    => '0.01',
+    'ExtUtils::Typemap::ObjectMap'   => '0.04',
+    'ExtUtils::Typemap::STL::String' => '0.04',
+    'ExtUtils::Typemap::Basic'       => '0.04',
   },
   extra_linker_flags     => ['-lzmq'],
   extra_compiler_flags   => ['-O2'],
