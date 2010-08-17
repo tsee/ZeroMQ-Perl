@@ -1,9 +1,0 @@
-
-%module{ZeroMQ};
-%package{ZeroMQ};
-
-%{
-#include <myinit.h>
-INCLUDE: const-xs.inc
-%}
-
