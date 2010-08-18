@@ -10,6 +10,7 @@ our %EXPORT_TAGS = ( 'all' => [
 # socket types
   qw(
     ZMQ_REQ ZMQ_REP
+    ZMQ_XREQ ZMQ_XREP
 
     ZMQ_PUB ZMQ_SUB
 
@@ -36,6 +37,11 @@ our %EXPORT_TAGS = ( 'all' => [
 
     ZMQ_SUBSCRIBE
     ZMQ_UNSUBSCRIBE
+  ),
+# miscellenaeous
+  qw(
+    ZMQ_QUEUE
+    device
   ),
 ] );
 
