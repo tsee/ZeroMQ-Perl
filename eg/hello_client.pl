@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 use strict;
-use ZeroMQ qw(ZMQ_REQ);;
+use ZeroMQ qw(ZMQ_REQ);
 
 my ($host, $port);
 
