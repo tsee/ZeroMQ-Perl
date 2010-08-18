@@ -214,6 +214,42 @@ PerlZMQ_Socket_connect(socket, addr)
     OUTPUT:
         RETVAL
 
+void
+PerlZMQ_Socket_setsockopt(socket, option_name, option_value)
+        PerlZMQ_Socket *socket;
+        int option_name;
+        SV *option_value;
+    CODE:
+        switch (option_name) {
+        case ZMQ_HWM:
+        case ZMQ_SWAP:
+        case ZMQ_AFFINITY:
+            {
+                int64_t v = SvIV(option_value);
+                zmq_setsockopt(socket, option_name, (void*)&v, sizeof(int64_t));
+            }
+            break;
+        case ZMQ_IDENTITY:
+        case ZMQ_SUBSCRIBE:
+        case ZMQ_UNSUBSCRIBE:
+            {
+                size_t option_length;
+                char *v = SvPV(option_value, option_length);
+                zmq_setsockopt(socket, option_name, (void*)v, option_length);
+            }
+            break;
+        case ZMQ_RATE:
+        case ZMQ_RECOVERY_IVL:
+        case ZMQ_MCAST_LOOP:
+        case ZMQ_SNDBUF:
+        case ZMQ_RCVBUF:
+            {
+                uint64_t v = SvUV(option_value);
+                zmq_setsockopt(socket, option_name, (void*)&v, sizeof(uint64_t));
+            }
+            break;
+        }
+
 SV *
 PerlZMQ_Socket_getsockopt(socket, option_name)
         PerlZMQ_Socket *socket;
