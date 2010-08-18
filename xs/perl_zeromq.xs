@@ -154,11 +154,21 @@ static MGVTBL PerlZMQ_Message_vtbl = { /* for identity */
 };
 
 
-MODULE = ZeroMQ    PACKAGE = ZeroMQ 
+MODULE = ZeroMQ    PACKAGE = ZeroMQ           PREFIX = PerlZMQ_
 
 PROTOTYPES: DISABLE
 
 INCLUDE: const-xs.inc
+
+int
+PerlZMQ_device(device, insock, outsock)
+        int device;
+        PerlZMQ_Socket *insock;
+        PerlZMQ_Socket *outsock;
+    CODE:
+        RETVAL = zmq_device( device, insock, outsock );
+    OUTPUT:
+        RETVAL
 
 MODULE = ZeroMQ    PACKAGE = ZeroMQ::Context   PREFIX = PerlZMQ_Context_
 
