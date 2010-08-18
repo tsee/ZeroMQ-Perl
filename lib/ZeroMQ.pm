@@ -154,6 +154,8 @@ L<ExtUtils::XSpp>, L<Module::Build::WithXSpp>
 
 Steffen Mueller, E<lt>smueller@cpan.orgE<gt>
 
+Daisuke Maki, E<lt>daisuke@endeworks.jpE<gt>
+
 =head1 COPYRIGHT AND LICENSE
 
 The ZeroMQ module is
