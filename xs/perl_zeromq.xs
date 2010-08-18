@@ -391,3 +391,11 @@ PerlZMQ_Message_data(message)
     OUTPUT:
         RETVAL
 
+SV *
+PerlZMQ_Message_size(message)
+        PerlZMQ_Message *message;
+    CODE:
+        RETVAL = newSVuv(zmq_msg_size(message));
+    OUTPUT:
+        RETVAL
+
