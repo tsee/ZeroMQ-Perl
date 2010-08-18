@@ -45,6 +45,10 @@ our @EXPORT = qw();
 require XSLoader;
 XSLoader::load('ZeroMQ', $VERSION);
 
+sub ZeroMQ::Context::socket {
+    return ZeroMQ::Socket->new(@_); # $_[0] should contain the context
+}
+
 1;
 __END__
 
