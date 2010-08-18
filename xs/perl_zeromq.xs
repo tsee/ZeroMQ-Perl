@@ -280,12 +280,34 @@ PerlZMQ_Socket_recv(socket, flags = 0)
         RETVAL
 
 int
-PerlZMQ_Socket_send(socket, msg, flags = 0)
+PerlZMQ_Socket_send(socket, message, flags = 0)
         PerlZMQ_Socket *socket;
-        PerlZMQ_Message *msg;
+        SV *message;
         int flags;
+    PREINIT:
+        int allocated = 0;
+        PerlZMQ_Message *msg = NULL;
     CODE:
+        if (! SvOK(message))
+            croak("ZeroMQ::Socket::send() NULL message passed");
+
+        if (sv_isobject(message) && sv_isa(message, "ZeroMQ::Message")) {
+            MAGIC *mg = PerlZMQ_Context_mg_find(aTHX_ SvRV(message), &PerlZMQ_Message_vtbl);
+            if (mg) {
+                msg = (PerlZMQ_Message *) mg->mg_ptr;
+            }
+        } else {
+            STRLEN data_len;
+            char *data = SvPV(message, data_len);
+            Newxz(msg, 1, PerlZMQ_Message);
+            allocated = 1;
+            zmq_msg_init_data(msg, data, data_len, NULL, NULL);
+        }
+
         RETVAL = (zmq_send(socket, msg, flags) == 0);
+
+        if (allocated)
+            Safefree(msg);
     OUTPUT:
         RETVAL
 
