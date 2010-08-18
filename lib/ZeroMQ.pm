@@ -3,6 +3,7 @@ use 5.008;
 use strict;
 
 our $VERSION = '0.01';
+require Exporter;
 our @ISA = qw(Exporter);
 
 # TODO: keep in sync with docs below and Build.PL
@@ -50,10 +51,6 @@ our @EXPORT = qw();
 
 require XSLoader;
 XSLoader::load('ZeroMQ', $VERSION);
-
-sub ZeroMQ::Context::socket {
-    return ZeroMQ::Socket->new(@_); # $_[0] should contain the context
-}
 
 1;
 __END__
