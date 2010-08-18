@@ -75,9 +75,12 @@ sub write_typemap {
 $map->[0]
     {
         MAGIC *mg;
-        mg = $map->[1]_mg_find(aTHX_ SvRV(\$arg), &$map->[1]_vtbl);
-        if (mg) {
-            \$var = ($map->[1] *) mg->mg_ptr;
+        \$var = NULL;
+        if (sv_isobject(\$arg)) {
+            mg = $map->[1]_mg_find(aTHX_ SvRV(\$arg), &$map->[1]_vtbl);
+            if (mg) {
+                \$var = ($map->[1] *) mg->mg_ptr;
+            }
         }
     }
 EOM
