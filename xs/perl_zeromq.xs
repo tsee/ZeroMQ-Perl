@@ -183,6 +183,21 @@ PerlZMQ_Context_new(class_sv, threads = 1)
     OUTPUT:
         RETVAL
 
+PerlZMQ_Socket *
+PerlZMQ_Context_socket(ctxt, socktype)
+        PerlZMQ_Context *ctxt;
+        int socktype;
+    PREINIT:
+        SV* class_sv = sv_2mortal(newSV(0));
+    CODE:
+        if (ctxt == NULL)
+            croak("Invalid ZeroMQ::Context passed to ZeroMQ::Context::socket");
+
+        RETVAL = zmq_socket(ctxt, socktype);
+    OUTPUT:
+        RETVAL
+
+
 MODULE = ZeroMQ    PACKAGE = ZeroMQ::Socket   PREFIX = PerlZMQ_Socket_
 
 PROTOTYPES: DISABLE

@@ -37,7 +37,7 @@ pass();
   $sock->bind("inproc://myPrivateSocket");
   pass();
 
-  my $client = ZeroMQ::Socket->new($cxt, ZMQ_DOWNSTREAM); # sender
+  my $client = $cxt->socket(ZMQ_DOWNSTREAM); # sender
   $client->connect("inproc://myPrivateSocket");
   pass("alive after connect");
 
