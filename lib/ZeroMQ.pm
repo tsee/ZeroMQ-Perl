@@ -72,7 +72,7 @@ our %EXPORT_TAGS = (
 );
 
 $EXPORT_TAGS{all} = [ map { @$_ } values %EXPORT_TAGS ];
-our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
+our @EXPORT_OK = ( 'ZMQ_HAUSNUMERO', @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw();
 
 require XSLoader;
@@ -80,14 +80,16 @@ XSLoader::load('ZeroMQ', $VERSION);
 
 our %SERIALIZERS;
 our %DESERIALIZERS;
+sub register_read_type { $DESERIALIZERS{$_[0]} = $_[1] }
+sub register_write_type { $SERIALIZERS{$_[0]} = $_[1] }
+
 eval {
     require JSON;
-    $SERIALIZERS{json} = \&JSON::encode_json;
-    $DESERIALIZERS{json} = \&JSON::decode_json;
+    JSON->import(2.00);
+    register_read_type(json => \&JSON::decode_json);
+    register_write_type(json => \&JSON::encode_json);
 };
 
-sub register_read_type { $SERIALIZERS{$_[0]} = $_[1] }
-sub register_write_type { $DESERIALIZERS{$_[0]} = $_[1] }
 
 sub ZeroMQ::Context::socket {
     return ZeroMQ::Socket->new(@_); # $_[0] should contain the context
@@ -102,32 +104,83 @@ ZeroMQ - A ZeroMQ2 wrapper for Perl
 
 =head1 SYNOPSIS
 
-  use ZeroMQ qw/:all/;
-  
-  my $cxt = ZeroMQ::Context->new;
-  my $sock = $cxt->socket(ZMQ_REP);
-  $sock->bind($addr);
-  
-  my $msg;
-  foreach (1..$roundtrip_count) {
-    $msg = $sock->recv();
-    die "Bad size" if $msg->size() != $msg_size;
-    $sock->send($msg);
-  }
+    # echo server
+    use ZeroMQ qw/:all/;
 
-See the F<xt/> directory for full examples.
+    my $cxt = ZeroMQ::Context->new;
+    my $sock = $cxt->socket(ZMQ_REP);
+    $sock->bind($addr);
+  
+    my $msg;
+    foreach (1..$roundtrip_count) {
+        $msg = $sock->recv();
+        $sock->send($msg);
+    }
+
+    # custom serialization
+    ZeroMQ::register_read_type(myformat => sub { ... });
+    ZeroMQ::register_write_type(myformat => sub { .. });
+
+    $socket->send_as( myformat => $data ); # serialize using above callback
+    my $thing = $socket->recv_as( "myformat" );
+
+See the F<eg/> directory for full examples.
 
 =head1 DESCRIPTION
 
-The C<ZeroMQ> module is a wrapper of the 0MQ message
-passing library for Perl. It's a thin wrapper around the
-C++ API.
+The C<ZeroMQ> module is a wrapper of the 0MQ message passing library for Perl. 
+It's a thin wrapper around the C API. Please read L<http://zeromq.org> for
+more details on ZeroMQ.
 
-Loading C<ZeroMQ> will make the L<ZeroMQ::Context>,
-L<ZeroMQ::Socket>, and L<ZeroMQ::Message> classes available
-as well.
+Loading C<ZeroMQ> will make the L<ZeroMQ::Context>, L<ZeroMQ::Socket>, and 
+L<ZeroMQ::Message> classes available as well.
 
-=head2 EXPORTS
+=head1 FUNCTIONS
+
+=head2 device($type, $sock1, $sock2)
+
+=head2 register_read_type($name, \&callback)
+
+Register a read callback for a given C<$name>. This is used in C<recv_as()>.
+The callback receives the data received from the socket.
+
+=head2 register_write_type($name, \&callback)
+
+Register a write callback for a given C<$name>. This is used in C<send_as()>
+The callback receives the Perl structure given to C<send_as()>
+
+=head1 SERIALIZATION
+
+ZeroMQ.pm comes with a simple serialization/deserialization mechanism.
+
+To serialize, use C<register_write_type()> to register a name and an
+associated callback to serialize the data. For example, for JSON we do
+the following:
+
+    use JSON ();
+    ZeroMQ::register_write_type('json' => \&JSON::encode_json);
+    ZeroMQ::register_read_type('json' => \&JSON::decode_json);
+
+Then you can use C<send_as()> and C<recv_as()> to specify the serialization type as the
+first argument:
+
+    my $ctxt = ZeroMQ::Context->new();
+    my $sock = $ctxt->socket( ZMQ_REQ );
+
+    $sock->send_as( json => $complex_perl_data_structure );
+
+The otherside will receive a JSON encoded data. The receivind side
+can be written as:
+
+    my $ctxt = ZeroMQ::Context->new();
+    my $sock = $ctxt->socket( ZMQ_REP );
+
+    my $complex_perl_data_structure = $sock->recv_as( 'json' );
+
+If you have JSON.pm (must be 2.00 or above), then the JSON serializer / 
+deserializer is automatically enabled.
+
+=head1 EXPORTS
 
 You may choose to import one or more (using the C<:all> import tag)
 constants into your namespace by supplying arguments to the
@@ -135,40 +188,103 @@ C<use ZeroMQ> call as shown in the synopsis above.
 
 The exportable constants are:
 
-=over 2
+=head1 EXPORTS
 
-=item *
+=head2 C<:socket> - Socket types and socket options
 
-Socket types
-  
-    ZMQ_REQ ZMQ_REP
-    ZMQ_PUB ZMQ_SUB
-    ZMQ_DOWNSTREAM ZMQ_UPSTREAM
-    ZMQ_PAIR
+=over 4
 
-=item *
+=item ZMQ_PAIR
 
-Socket recv flags
+=item ZMQ_PUB
 
-      ZMQ_NOBLOCK
+=item ZMQ_SUB
 
-=item *
+=item ZMQ_REQ
 
-get/setsockopt options
+=item ZMQ_REP
 
-    ZMQ_RCVMORE
-    ZMQ_HWM
-    ZMQ_SWAP
-    ZMQ_AFFINITY
-    ZMQ_IDENTITY
-    ZMQ_RATE
-    ZMQ_RECOVERY_IVL
-    ZMQ_MCAST_LOOP
-    ZMQ_SNDBUF
-    ZMQ_RCVBUF
+=item ZMQ_XREQ
 
-    ZMQ_SUBSCRIBE
-    ZMQ_UNSUBSCRIBE
+=item ZMQ_XREP
+
+=item ZMQ_PULL
+
+=item ZMQ_PUSH
+
+=item ZMQ_UPSTREAM
+
+=item ZMQ_DOWNSTREAM
+
+=item ZMQ_NOBLOCK
+
+=item ZMQ_SNDMORE
+
+=item ZMQ_HWM
+
+=item ZMQ_SWAP
+
+=item ZMQ_AFFINITY
+
+=item ZMQ_IDENTITY
+
+=item ZMQ_SUBSCRIBE
+
+=item ZMQ_UNSUBSCRIBE
+
+=item ZMQ_RATE
+
+=item ZMQ_RECOVERY_IVL
+
+=item ZMQ_MCAST_LOOP
+
+=item ZMQ_SNDBUF
+
+=item ZMQ_RCVBUF
+
+=item ZMQ_RCVMORE
+
+=item ZMQ_POLLIN
+
+=item ZMQ_POLLOUT
+
+=item ZMQ_POLLERR
+
+=back
+
+=head2 C<:device> - Device types
+
+=over 4
+
+=item ZMQ_QUEUE
+
+=item ZMQ_FORWARDER
+
+=item ZMQ_STREAMER
+
+=back
+
+=head2 C<:message> - Message Options
+
+=over 4
+
+=item ZMQ_MAX_VSM_SIZE
+
+=item ZMQ_DELIMITER
+
+=item ZMQ_VSM
+
+=item ZMQ_MSG_MORE
+
+=item ZMQ_MSG_SHARED
+
+=back
+
+=head2 miscellaneous
+
+=over 4
+
+=item ZMQ_HAUSNUMERO
 
 =back
 
@@ -189,11 +305,11 @@ L<ZeroMQ::Context>, L<ZeroMQ::Socket>, L<ZeroMQ::Message>
 
 L<http://zeromq.org>
 
-L<ExtUtils::XSpp>, L<Module::Build::WithXSpp>
-
 =head1 AUTHOR
 
-Steffen Mueller, E<lt>smueller@cpan.orgE<gt>
+Steffen Mueller, C<< <smueller@cpan.org> >>
+
+Daisuke Maki C<< <daisuke@endeworks.jp> >>
 
 =head1 COPYRIGHT AND LICENSE
 
