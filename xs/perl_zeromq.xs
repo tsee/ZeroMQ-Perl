@@ -135,6 +135,7 @@ PerlZMQ_Message_free(pTHX_ SV* const sv, MAGIC* const mg)
 {
     PerlZMQ_Message* const msg = (PerlZMQ_Message *) mg->mg_ptr;
     PERL_UNUSED_VAR(sv);
+    zmq_msg_close(msg);
     Safefree(msg);
     return 1;
 }
