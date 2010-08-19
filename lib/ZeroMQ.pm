@@ -5,46 +5,73 @@ use strict;
 our $VERSION = '0.01';
 our @ISA = qw(Exporter);
 
-# TODO: keep in sync with docs below and Build.PL
-our %EXPORT_TAGS = ( 'all' => [
+# TODO: keep in sync with docs below and Makefile.PL
+
+our %EXPORT_TAGS = (
 # socket types
-  qw(
-    ZMQ_REQ ZMQ_REP
-    ZMQ_XREQ ZMQ_XREP
-
-    ZMQ_PUB ZMQ_SUB
-
-    ZMQ_DOWNSTREAM ZMQ_UPSTREAM
-
-    ZMQ_PAIR
-  ),
-# socket recv flags
-  qw(
-      ZMQ_NOBLOCK
-  ),
+    socket => [ qw(
+        ZMQ_PAIR
+        ZMQ_PUB
+        ZMQ_SUB
+        ZMQ_REQ
+        ZMQ_REP
+        ZMQ_XREQ
+        ZMQ_XREP
+        ZMQ_PULL
+        ZMQ_PUSH
+        ZMQ_UPSTREAM
+        ZMQ_DOWNSTREAM
+    ),
+# socket send/recv flags
+    qw(
+        ZMQ_NOBLOCK
+        ZMQ_SNDMORE
+    ),
 # get/setsockopt options
-  qw(
-    ZMQ_RCVMORE
-    ZMQ_HWM
-    ZMQ_SWAP
-    ZMQ_AFFINITY
-    ZMQ_IDENTITY
-    ZMQ_RATE
-    ZMQ_RECOVERY_IVL
-    ZMQ_MCAST_LOOP
-    ZMQ_SNDBUF
-    ZMQ_RCVBUF
+    qw(
+        ZMQ_HWM
+        ZMQ_SWAP
+        ZMQ_AFFINITY
+        ZMQ_IDENTITY
+        ZMQ_SUBSCRIBE
+        ZMQ_UNSUBSCRIBE
+        ZMQ_RATE
+        ZMQ_RECOVERY_IVL
+        ZMQ_MCAST_LOOP
+        ZMQ_SNDBUF
+        ZMQ_RCVBUF
+        ZMQ_RCVMORE
+    ),
+# i/o multiplexing
+    qw(
+        ZMQ_POLLIN
+        ZMQ_POLLOUT
+        ZMQ_POLLERR
+    ),
+    ],
+# devices
+    device => [ qw(
+        ZMQ_QUEUE
+        ZMQ_FORWARDER
+        ZMQ_STREAMER
+    ), ],
+# max size of vsm message
+    message => [ qw(
+        ZMQ_MAX_VSM_SIZE
+    ),
+# message types
+    qw(
+        ZMQ_DELIMITER
+        ZMQ_VSM
+    ),
+# message flags
+    qw(
+        ZMQ_MSG_MORE
+        ZMQ_MSG_SHARED
+    ), ]
+);
 
-    ZMQ_SUBSCRIBE
-    ZMQ_UNSUBSCRIBE
-  ),
-# miscellenaeous
-  qw(
-    ZMQ_QUEUE
-    device
-  ),
-] );
-
+$EXPORT_TAGS{all} = [ map { @$_ } values %EXPORT_TAGS ];
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw();
 
