@@ -9,27 +9,41 @@ BEGIN {
 use strict;
 use warnings;
 use threads;
-use File::Spec;
-
-
-use Test::More tests => 5;
+use Test::More;
 use ZeroMQ qw/:all/;
 
-pass();
+{
+    my $cxt = ZeroMQ::Context->new(1);
+    isa_ok($cxt, 'ZeroMQ::Context');
+
+    my $main_socket = $cxt->socket(ZMQ_UPSTREAM);
+    isa_ok($main_socket, "ZeroMQ::Socket");
+    my $t = threads->new(sub {
+        my $sock = $cxt->socket( ZMQ_UPSTREAM );
+        $sock->bind("inproc://myPrivateSocket");
+    
+        my $client = $cxt->socket(ZMQ_DOWNSTREAM); # sender
+        $client->connect("inproc://myPrivateSocket");
+
+        $client->send( "Wee Woo" );
+        my $data = $sock->recv();
+        my $ok = ($data->data eq "Wee Woo");
+        return $ok;
+    });
+    my $ok = $t->join();
+    ok($ok, "socket and context not defined in subthread");
+}
 
 {
-  my $cxt = ZeroMQ::Context->new(1);
-  isa_ok($cxt, 'ZeroMQ::Context');
+    my $msg = ZeroMQ::Message->new( "Wee Woo" );
+    my $t = threads->new( sub {
+        return $msg->data eq "Wee Woo" &&
+            $msg->size == 7;
+    });
 
-  my $socket = ZeroMQ::Socket->new($cxt, ZMQ_UPSTREAM);
-  my $t = threads->new(sub {
-    return 1 if ref($socket) eq 'SCALAR' and not defined $$socket;
-    return 1 if ref($cxt) eq 'SCALAR' and not defined $$cxt;
-    return 0;
-  });
-  pass();
-  my $ok = $t->join();
-  ok($ok, "socket and context not defined in subthread");
+    my $ok = $t->join();
+    ok $ok, "message duped correctly";
 }
-pass();
+
+done_testing;
 

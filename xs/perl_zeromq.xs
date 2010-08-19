@@ -1,18 +1,44 @@
 #include "perl_zeromq.h"
 
+#define PerlZMQ_Context_inc(ctxt) (ctxt->count++)
+#define PerlZMQ_Context_dec(ctxt) (ctxt->count--)
+#define PerlZMQ_Context_count(ctxt) (ctxt->count)
+#define PerlZMQ_Context_ctxt(ctxt) (ctxt->ctxt)
+#define PerlZMQ_Context_term(ctxt) (zmq_term(ctxt->ctxt))
+static PerlZMQ_Context *
+PerlZMQ_Context_init(int threads) {
+    PerlZMQ_Context *ctxt;
+    Newxz(ctxt, 1, PerlZMQ_Context);
+
+    ctxt->ctxt = zmq_init(threads);
+    ctxt->count = 1;
+
+    return ctxt;
+}
+
 static int
 PerlZMQ_Context_free(pTHX_ SV* const sv, MAGIC* const mg)
 {
     PerlZMQ_Context* const ctxt = (PerlZMQ_Context *) mg->mg_ptr;
     PERL_UNUSED_VAR(sv);
-    zmq_term( ctxt );
+#ifdef USE_ITHREADS
+    PerlZMQ_Context_dec(ctxt);
+    if (PerlZMQ_Context_count(ctxt) == 0)  {
+        PerlZMQ_Context_term( ctxt );
+        Safefree( ctxt );
+    }
+#else
+    Perl_ZMQ_Context_term( ctxt );
+    Safefree( ctxt );
+#endif
     return 1;
 }
 
 static int
 PerlZMQ_Context_mg_dup(pTHX_ MAGIC* const mg, CLONE_PARAMS* const param){
 #ifdef USE_ITHREADS /* single threaded perl has no "xxx_dup()" APIs */
-    PERL_UNUSED_VAR(mg);
+    PerlZMQ_Context *ctxt = (PerlZMQ_Context *) mg->mg_ptr;
+    PerlZMQ_Context_inc(ctxt);
     PERL_UNUSED_VAR(param);
 #else
     PERL_UNUSED_VAR(mg);
@@ -54,16 +80,17 @@ static MGVTBL PerlZMQ_Context_vtbl = { /* for identity */
 static int
 PerlZMQ_Socket_free(pTHX_ SV* const sv, MAGIC* const mg)
 {
-    PerlZMQ_Socket* const ctxt = (PerlZMQ_Socket *) mg->mg_ptr;
+    PerlZMQ_Socket* const sock = (PerlZMQ_Socket *) mg->mg_ptr;
+    if (sock != NULL) 
+        zmq_close( sock );
     PERL_UNUSED_VAR(sv);
-    zmq_close( ctxt );
     return 1;
 }
 
 static int
 PerlZMQ_Socket_mg_dup(pTHX_ MAGIC* const mg, CLONE_PARAMS* const param){
 #ifdef USE_ITHREADS /* single threaded perl has no "xxx_dup()" APIs */
-    PERL_UNUSED_VAR(mg);
+    mg->mg_ptr = NULL;
     PERL_UNUSED_VAR(param);
 #else
     PERL_UNUSED_VAR(mg);
@@ -105,16 +132,23 @@ static MGVTBL PerlZMQ_Socket_vtbl = { /* for identity */
 static int
 PerlZMQ_Message_free(pTHX_ SV* const sv, MAGIC* const mg)
 {
-    PerlZMQ_Message* const ctxt = (PerlZMQ_Message *) mg->mg_ptr;
+    PerlZMQ_Message* const msg = (PerlZMQ_Message *) mg->mg_ptr;
     PERL_UNUSED_VAR(sv);
-    Safefree(ctxt);
+    Safefree(msg);
     return 1;
 }
 
 static int
 PerlZMQ_Message_mg_dup(pTHX_ MAGIC* const mg, CLONE_PARAMS* const param){
 #ifdef USE_ITHREADS /* single threaded perl has no "xxx_dup()" APIs */
-    PERL_UNUSED_VAR(mg);
+    PerlZMQ_Message* const msg = (PerlZMQ_Message *) mg->mg_ptr;
+    if (msg != NULL) {
+        PerlZMQ_Message *newmsg;
+
+        Newxz(newmsg, 1, PerlZMQ_Message);
+        zmq_msg_init_data( newmsg, zmq_msg_data(msg), zmq_msg_size(msg), NULL, NULL );
+        mg->mg_ptr = (char *) newmsg;
+    }
     PERL_UNUSED_VAR(param);
 #else
     PERL_UNUSED_VAR(mg);
@@ -271,7 +305,7 @@ PerlZMQ_Context_new(class_sv, threads = 1)
         SV *class_sv;
         int threads;
     CODE:
-        RETVAL = zmq_init(threads);
+        RETVAL = PerlZMQ_Context_init(threads);
     OUTPUT:
         RETVAL
 
@@ -288,7 +322,7 @@ PerlZMQ_Socket_new(class_sv, ctxt, socktype)
         if (ctxt == NULL)
             croak("Invalid ZeroMQ::Context passed to ZeroMQ::Socket->new");
 
-        RETVAL = zmq_socket(ctxt, socktype);
+        RETVAL = zmq_socket(PerlZMQ_Context_ctxt(ctxt), socktype);
     OUTPUT:
         RETVAL
 
