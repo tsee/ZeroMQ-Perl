@@ -33,7 +33,10 @@ t/003_message.t
 t/100_basic.t
 t/101_threads.t
 t/103_json.t
+xs/const-xs.inc
 xs/perl_zeromq.h
 xs/perl_zeromq.xs
 xs/typemap
 xt/999_leak.t
+xt/999_pod-coverage.t
+xt/999_pod.t
