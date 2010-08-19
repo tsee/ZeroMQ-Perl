@@ -65,6 +65,8 @@ C<ZMQ_DOWNSTREAM> receives them.
 The C<ZMQ_PAIR> type allows bidirectional message passing between two
 participants.
 
+=back
+
 =head1 METHODS
 
 =head2 new
