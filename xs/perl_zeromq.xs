@@ -153,6 +153,98 @@ static MGVTBL PerlZMQ_Message_vtbl = { /* for identity */
     NULL,  /* local */
 };
 
+static void
+simple_free_cb(void *data, void *hint) {
+    PERL_UNUSED_VAR(hint);
+    Safefree(data);
+}
+
+static void
+PerlZMQ_serialize( const char *type, char **data, size_t *data_len, SV *input) {
+    HV *serializers;
+    SV **cvr;
+
+    serializers = get_hv( "ZeroMQ::SERIALIZERS", 0 );
+    cvr = hv_fetch( serializers, type, strlen(type), 0 );
+    if (cvr == NULL)
+        croak("Serializer for %s not found", type);
+
+    if (SvTYPE(*cvr) == SVt_PVCV)
+        croak("Serializer for %s not found", type);
+
+    {
+        dSP;
+        int count;
+        SV *serialized_sv;
+        char *serialized;
+
+        ENTER;
+        SAVETMPS;
+        PUSHMARK(SP);
+        XPUSHs( input );
+        PUTBACK;
+        count = call_sv( *cvr,  G_SCALAR );
+        SPAGAIN;
+
+        if (count < 1) {
+            croak("serialize did not return any values");
+        }
+
+        serialized_sv = POPs;
+        serialized = SvPV( serialized_sv, *data_len );
+
+        Newxz( *data, *data_len, char );
+        Copy( serialized, *data, *data_len, char );
+
+        PUTBACK;
+        FREETMPS;
+        LEAVE;
+    }
+}
+
+static SV *
+PerlZMQ_deserialize( const char *type, char *data, size_t data_len) {
+    SV *input;
+    HV *deserializers;
+    SV *output;
+    SV **cvr;
+
+    input = sv_2mortal(newSVpv( data, data_len ));
+    deserializers = get_hv( "ZeroMQ::DESERIALIZERS", 0 );
+
+    cvr = hv_fetch( deserializers, type, strlen(type), 0 );
+    if (cvr == NULL)
+        croak("Deserializer for %s not found", type);
+
+    if (SvTYPE(*cvr) == SVt_PVCV)
+        croak("Deserializer for %s not found", type);
+
+    {
+        dSP;
+        int count;
+        SV *deserialized;
+
+        ENTER;
+        SAVETMPS;
+        PUSHMARK(SP);
+        XPUSHs( input );
+        PUTBACK;
+        count = call_sv( *cvr,  G_SCALAR );
+        SPAGAIN;
+
+        if (count < 1) {
+            croak("deserialize did not return any values");
+        }
+
+        deserialized = POPs;
+        output = newSVsv(deserialized);
+
+        PUTBACK;
+        FREETMPS;
+        LEAVE;
+    }
+    return output;
+}
 
 MODULE = ZeroMQ    PACKAGE = ZeroMQ           PREFIX = PerlZMQ_
 
@@ -305,6 +397,29 @@ PerlZMQ_Socket_getsockopt(socket, option_name)
     OUTPUT:
         RETVAL
 
+SV *
+PerlZMQ_Socket_recv_as(socket, type, flags = 0)
+        PerlZMQ_Socket *socket;
+        char *type;
+        int flags;
+    PREINIT:
+        PerlZMQ_Message *to_recv = NULL;
+    CODE:
+        if (type == NULL)
+            croak("ZeroMQ::Socket::send_as() NULL serialization type passed");
+
+        Newxz(to_recv, 1, PerlZMQ_Message);
+        zmq_msg_init(to_recv);
+        if (zmq_recv(socket, to_recv, flags) != 0) {
+            zmq_msg_close( to_recv );
+            Safefree(to_recv);
+            XSRETURN(0);
+        }
+
+        RETVAL = PerlZMQ_deserialize( type, (char *) zmq_msg_data(to_recv), zmq_msg_size(to_recv) );
+    OUTPUT:
+        RETVAL
+
 PerlZMQ_Message *
 PerlZMQ_Socket_recv(socket, flags = 0)
         PerlZMQ_Socket *socket;
@@ -322,6 +437,33 @@ PerlZMQ_Socket_recv(socket, flags = 0)
             RETVAL = NULL;
             XSRETURN(0);
         }
+    OUTPUT:
+        RETVAL
+
+int
+PerlZMQ_Socket_send_as(socket, type, message, flags = 0)
+        PerlZMQ_Socket *socket;
+        char *type;
+        SV *message;
+        int flags;
+    PREINIT:
+        char *data = NULL;
+        size_t data_len = 0;
+        PerlZMQ_Message *to_send = NULL;
+    CODE:
+        if (! SvOK(message))
+            croak("ZeroMQ::Socket::send() NULL message passed");
+        if (type == NULL)
+            croak("ZeroMQ::Socket::send_as() NULL serialization type passed");
+
+        PerlZMQ_serialize( type, &data, &data_len, message);
+        Newxz(to_send, 1, PerlZMQ_Message);
+        zmq_msg_init_data( to_send, data, data_len, &simple_free_cb, NULL );
+
+        RETVAL = (zmq_send(socket, to_send, flags) == 0);
+
+        zmq_msg_close( to_send );
+        Safefree( to_send );
     OUTPUT:
         RETVAL
 

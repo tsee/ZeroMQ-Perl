@@ -13,10 +13,15 @@ use File::Spec;
 
 name 'ZeroMQ';
 all_from 'lib/ZeroMQ.pm';
+
+test_requires 'Test::Requires';
+recommends 'JSON';
+
 use_ppport;
 cc_warnings;
 cc_libs 'zmq';
 cc_src_paths 'xs';
+
 author_tests 'xt';
 WriteAll;
 

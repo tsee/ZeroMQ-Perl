@@ -51,6 +51,17 @@ our @EXPORT = qw();
 require XSLoader;
 XSLoader::load('ZeroMQ', $VERSION);
 
+our %SERIALIZERS;
+our %DESERIALIZERS;
+eval {
+    require JSON;
+    $SERIALIZERS{json} = \&JSON::encode_json;
+    $DESERIALIZERS{json} = \&JSON::decode_json;
+};
+
+sub register_read_type { $SERIALIZERS{$_[0]} = $_[1] }
+sub register_write_type { $DESERIALIZERS{$_[0]} = $_[1] }
+
 sub ZeroMQ::Context::socket {
     return ZeroMQ::Socket->new(@_); # $_[0] should contain the context
 }
@@ -67,7 +78,7 @@ ZeroMQ - A ZeroMQ2 wrapper for Perl
   use ZeroMQ qw/:all/;
   
   my $cxt = ZeroMQ::Context->new;
-  my $sock = ZeroMQ::Socket->new($cxt, ZMQ_REP);
+  my $sock = $cxt->socket(ZMQ_REP);
   $sock->bind($addr);
   
   my $msg;
