@@ -1,5 +1,18 @@
 Changelog for Perl module ZeroMQ.
 
+0.01_01  Thu Aug 19 2010 20:00 JST
+  - Daisuke Maki (lestrrat) hacked the following:
+    * Use plain XS -- only because I don't know C++
+    * Implemented serialization/deserialization
+    * Worked on more thread safety
+    * Updated constants
+    * Implemented $ctxt->socket
+    * Implemented $socket->send($plain_string)
+    * Implemented ZeroMQ::device() 
+    * Implemented example scripts from http://zeromq.org/docs:introduction
+      under eg/
+
+
 0.01  Tue Jul 13 2010 20:00 CET
   - Initial release
 
