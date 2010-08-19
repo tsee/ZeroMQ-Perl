@@ -5,6 +5,7 @@
 #define PerlZMQ_Context_count(ctxt) (ctxt->count)
 #define PerlZMQ_Context_ctxt(ctxt) (ctxt->ctxt)
 #define PerlZMQ_Context_term(ctxt) (zmq_term(ctxt->ctxt))
+
 static PerlZMQ_Context *
 PerlZMQ_Context_init(int threads) {
     PerlZMQ_Context *ctxt;
@@ -28,7 +29,7 @@ PerlZMQ_Context_free(pTHX_ SV* const sv, MAGIC* const mg)
         Safefree( ctxt );
     }
 #else
-    Perl_ZMQ_Context_term( ctxt );
+    PerlZMQ_Context_term( ctxt );
     Safefree( ctxt );
 #endif
     return 1;
@@ -333,7 +334,7 @@ PerlZMQ_Socket_bind(socket, addr)
     CODE:
         RETVAL = zmq_bind(socket, addr);
         if (RETVAL != 0) {
-            croak( zmq_strerror( zmq_errno() ) );
+            croak( "%s", zmq_strerror( zmq_errno() ) );
         }
     OUTPUT:
         RETVAL
@@ -345,7 +346,7 @@ PerlZMQ_Socket_connect(socket, addr)
     CODE:
         RETVAL = zmq_connect(socket, addr);
         if (RETVAL != 0) {
-            croak( zmq_strerror( zmq_errno() ) );
+            croak( "%s", zmq_strerror( zmq_errno() ) );
         }
     OUTPUT:
         RETVAL
