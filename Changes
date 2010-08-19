@@ -1,5 +1,10 @@
 Changelog for Perl module ZeroMQ.
 
+0.01_01  Thu Aug 20 2010 08:00 JST
+  - No code change.
+  - Add missing xs/const-xs.inc file
+  - Add POD tests (author tests)
+
 0.01_01  Thu Aug 19 2010 20:00 JST
   - Daisuke Maki (lestrrat) hacked the following:
     * Use plain XS -- only because I don't know C++

@@ -2,7 +2,7 @@ package ZeroMQ;
 use 5.008;
 use strict;
 
-our $VERSION = '0.01_01';
+our $VERSION = '0.01_02';
 our @ISA = qw(Exporter);
 
 # TODO: keep in sync with docs below and Makefile.PL
