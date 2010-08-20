@@ -178,7 +178,15 @@ can be written as:
     my $complex_perl_data_structure = $sock->recv_as( 'json' );
 
 If you have JSON.pm (must be 2.00 or above), then the JSON serializer / 
-deserializer is automatically enabled.
+deserializer is automatically enabled. If you want to tweak the serializer
+option, do something like this:
+
+    my $coder = JSON->new->utf8->pretty; # pretty print
+    ZeroMQ::register_write_type( json => sub { $coder->encode($_[0]) } );
+    ZeroMQ::register_read_type( json => sub { $coder->decode($_[0]) } );
+
+Note that this will have a GLOBAL effect. If you want to change only
+your application, use a name that's different from 'json'.
 
 =head1 EXPORTS
 
