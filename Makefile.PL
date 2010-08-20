@@ -88,6 +88,9 @@ $map->[0]
                 \$var = ($map->[1] *) mg->mg_ptr;
             }
         }
+
+        if (\$var == NULL)
+            croak(\\"Invalid $map->[2] object (perhaps you've already closed it?)\\");
     }
 EOM
         push @output, <<EOM;

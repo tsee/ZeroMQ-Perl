@@ -566,7 +566,8 @@ PerlZMQ_Socket_close(socket)
     CODE:
         RETVAL = zmq_close(socket);
         mg = PerlZMQ_Socket_mg_find(aTHX_ SvRV(ST(0)), &PerlZMQ_Socket_vtbl);
-        mg->mg_ptr = NULL;
+        if (mg != NULL)
+            mg->mg_ptr = NULL;
     OUTPUT:
         RETVAL
 
