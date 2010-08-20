@@ -137,6 +137,15 @@ L<ZeroMQ::Message> classes available as well.
 
 =head1 FUNCTIONS
 
+=head2 version()
+
+Returns the version of the underlying zeromq library that is being linked.
+In scalar context, returns a dotted version string. In list context,
+returns a 3-element list of the version numbers:
+
+    my $version_string = ZeroMQ::version();
+    my ($major, $minor, $patch) = ZeroMQ::version();
+
 =head2 device($type, $sock1, $sock2)
 
 =head2 register_read_type($name, \&callback)
