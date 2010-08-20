@@ -20,6 +20,7 @@ recommends 'JSON' => '2.00';
 use_ppport;
 cc_warnings;
 cc_libs 'zmq';
+cc_assert_lib 'zmq';
 cc_src_paths 'xs';
 
 author_tests 'xt';
