@@ -535,6 +535,18 @@ PerlZMQ_Socket_send(socket, message, flags = 0)
     OUTPUT:
         RETVAL
 
+int
+PerlZMQ_Socket_close(socket)
+        PerlZMQ_Socket *socket;
+    PREINIT:
+        MAGIC *mg;
+    CODE:
+        RETVAL = zmq_close(socket);
+        mg = PerlZMQ_Socket_mg_find(aTHX_ SvRV(ST(0)), &PerlZMQ_Socket_vtbl);
+        mg->mg_ptr = NULL;
+    OUTPUT:
+        RETVAL
+
 MODULE = ZeroMQ   PACKAGE = ZeroMQ::Message    PREFIX = PerlZMQ_Message_
 
 PROTOTYPES: DISABLE
