@@ -1,6 +1,12 @@
 Changelog for Perl module ZeroMQ.
 
-0.01_01  Thu Aug 20 2010 08:00 JST
+0.01_03  Thu Aug 20 2010 21:00 JST
+  - Fake ZMQ_PULL and ZMQ_PUSH, which were introduced in git, but not in
+    the released version
+  - Use assert_lib() to die if zmq is not found
+  - Implement socket close()
+
+0.01_02  Thu Aug 20 2010 08:00 JST
   - No code change.
   - Add missing xs/const-xs.inc file
   - Add POD tests (author tests)
