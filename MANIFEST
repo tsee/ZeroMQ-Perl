@@ -27,9 +27,11 @@ MANIFEST
 MANIFEST.SKIP
 META.yml
 ppport.h
+t/000_compile.t
 t/001_context.t
 t/002_socket.t
 t/003_message.t
+t/004_version.t
 t/100_basic.t
 t/101_threads.t
 t/103_json.t

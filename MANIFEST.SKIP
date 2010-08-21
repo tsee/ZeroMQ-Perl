@@ -26,6 +26,7 @@
 # Avoid temp and backup files.
 ~$
 \.tmp$
+\.o$
 \.old$
 \.bak$
 \#$
@@ -33,6 +34,7 @@
 \.rej$
 \.swp$
 \.swo$
+\.bs$
 
 # Avoid OS-specific files/dirs
 #   Mac OSX metadata
@@ -45,6 +47,6 @@
 \.gitignore\b
 
 
-\bconst-\w+\.inc$
-
 ^MYMETA.yml$
+
+^xs/perl_zeromq.c$
