@@ -332,12 +332,6 @@ The exportable constants are:
 This is an early release. Proceed with caution, please report
 (or better yet: fix) bugs you encounter. Tested againt 0MQ 2.0.7.
 
-Use of the C<inproc://> transport layer doesn't seem to work
-between two perl ithreads. This may be due to the fact that right now,
-context aren't shared between ithreads and C<inproc> works
-only within a single context. Try another transport layer until
-contexts can be shared.
-
 =head1 SEE ALSO
 
 L<ZeroMQ::Context>, L<ZeroMQ::Socket>, L<ZeroMQ::Message>
