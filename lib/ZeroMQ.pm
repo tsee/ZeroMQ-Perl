@@ -90,9 +90,19 @@ eval {
     register_write_type(json => \&JSON::encode_json);
 };
 
-
 sub ZeroMQ::Context::socket {
     return ZeroMQ::Socket->new(@_); # $_[0] should contain the context
+}
+
+package
+    ZeroMQ::PollItem::Guard;
+sub new { 
+    my $class = shift;
+    bless { @_ }, $class;
+}
+sub DESTROY {
+    my $self = shift;
+    $self->{pollitem}->remove( $self->{id} );
 }
 
 1;
@@ -195,6 +205,17 @@ option, do something like this:
 
 Note that this will have a GLOBAL effect. If you want to change only
 your application, use a name that's different from 'json'.
+
+=head1 ASYNCHRONOUS I/O WITH ZEROMQ
+
+
+    use AnyEvent::ZeroMQ;
+
+    AE::zmq_recv $socket, sub {
+        my $message = shift;
+    };
+    
+    ZeroMQ::poll
 
 =head1 FUNCTIONS
 

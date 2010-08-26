@@ -69,6 +69,7 @@ sub write_typemap {
         [ 'T_PERLZMQ_CONTEXT', 'PerlZMQ_Context', 'ZeroMQ::Context' ],
         [ 'T_PERLZMQ_SOCKET', 'PerlZMQ_Socket', 'ZeroMQ::Socket' ],
         [ 'T_PERLZMQ_MESSAGE', 'PerlZMQ_Message', 'ZeroMQ::Message' ],
+        [ 'T_PERLZMQ_POLLITEM', 'PerlZMQ_PollItem', 'ZeroMQ::PollItem' ],
     );
 
     open( my $out, '>', $file ) or

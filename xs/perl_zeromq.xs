@@ -282,6 +282,61 @@ PerlZMQ_deserialize( const char *type, char *data, size_t data_len) {
     return output;
 }
 
+static MAGIC*
+PerlZMQ_PollItem_mg_find(pTHX_ SV* const sv, const MGVTBL* const vtbl){
+    MAGIC* mg;
+
+    assert(sv   != NULL);
+    assert(vtbl != NULL);
+
+    for(mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic){
+        if(mg->mg_virtual == vtbl){
+            assert(mg->mg_type == PERL_MAGIC_ext);
+            return mg;
+        }
+    }
+
+    croak("ZeroMQ::PollItem: Invalid ZeroMQ::Message object was passed to mg_find");
+    return NULL; /* not reached */
+}
+static int
+PerlZMQ_PollItem_free(pTHX_ SV* const sv, MAGIC* const mg)
+{
+    PerlZMQ_PollItem* const pollitem = (PerlZMQ_PollItem *) mg->mg_ptr;
+    if (pollitem != NULL) {
+        int i = 0;
+        for( i = 0; i < pollitem->item_count; i++ ) {
+            SvREFCNT_dec( pollitem->callbacks[i] );
+            Safefree(pollitem->items[i]);
+        }
+        Safefree(pollitem->items);
+        Safefree(pollitem->item_ids);
+        Safefree(pollitem);
+    }
+    PERL_UNUSED_VAR(sv);
+    return 1;
+}
+
+void
+PerlZMQ_PollItem_resize( PerlZMQ_PollItem *pollitem, int new_size ) {
+    Renew( pollitem->items, new_size, zmq_pollitem_t *);
+    Renew( pollitem->callbacks, new_size, SV *);
+    Renew( pollitem->item_ids, new_size, char *);
+    pollitem->bucket_size = new_size;
+}
+
+static MGVTBL PerlZMQ_PollItem_vtbl = { /* for identity */
+    NULL, /* get */
+    NULL, /* set */
+    NULL, /* len */
+    NULL, /* clear */
+    PerlZMQ_PollItem_free, /* free */
+    NULL, /* copy */
+    NULL, /* dup */
+    NULL,  /* local */
+};
+
+
 MODULE = ZeroMQ    PACKAGE = ZeroMQ           PREFIX = PerlZMQ_
 
 PROTOTYPES: DISABLE
@@ -612,3 +667,215 @@ PerlZMQ_Message_size(message)
         RETVAL = zmq_msg_size(message);
     OUTPUT:
         RETVAL
+
+MODULE = ZeroMQ   PACKAGE = ZeroMQ::PollItem    PREFIX = PerlZMQ_PollItem_
+
+PROTOTYPES: DISABLE
+
+PerlZMQ_PollItem *
+PerlZMQ_PollItem_new( class_sv );
+        SV *class_sv;
+    PREINIT:
+        PerlZMQ_PollItem *pollitem;
+    CODE:
+        Newxz(pollitem, 1, PerlZMQ_PollItem);
+        pollitem->bucket_size = 0;
+        pollitem->item_count  = 0;
+        /* resies to the current bucket size. cleanup not done */
+        PerlZMQ_PollItem_resize( pollitem, 10 );
+        RETVAL = pollitem;
+    OUTPUT:
+        RETVAL
+
+IV
+PerlZMQ_PollItem_size( pollitem )
+        PerlZMQ_PollItem *pollitem;
+    CODE:
+        RETVAL = pollitem->item_count;
+    OUTPUT:
+        RETVAL
+
+void
+PerlZMQ_PollItem_remove( pollitem, id )
+        PerlZMQ_PollItem *pollitem;
+        char *id;
+    PREINIT:
+        int i;
+    PPCODE:
+        for( i = 0; i < pollitem->item_count; i++ ) {
+            if (strEQ( pollitem->item_ids[i], id )) {
+                Safefree( pollitem->items[i] );
+                Safefree( pollitem->item_ids[i] );
+                SvREFCNT_dec( pollitem->callbacks[i] );
+                for (i = i + 1; i < pollitem->item_count; i++) {
+                    pollitem->items[i - 1] = pollitem->items[i];
+                    pollitem->callbacks[i - 1] = pollitem->callbacks[i];
+                }
+                pollitem->items[ pollitem->item_count ] = NULL;
+                pollitem->callbacks[ pollitem->item_count ] = NULL;
+                pollitem->item_count--;
+            }
+        }
+
+SV *
+PerlZMQ_PollItem_add( pollitem, socket, events, callback )
+        PerlZMQ_PollItem *pollitem;
+        PerlZMQ_Socket   *socket;
+        int events;
+        SV  *callback;
+    PREINIT:
+        char *id;
+        SV *guard;
+        SV *pollitem_sv = ST(0);
+    CODE:
+        if ( pollitem->bucket_size == pollitem->item_count ) {
+            PerlZMQ_PollItem_resize( pollitem, pollitem->bucket_size * 2 );
+        }
+
+        Newxz( pollitem->items[ pollitem->item_count ], 1, zmq_pollitem_t );
+        pollitem->items[ pollitem->item_count ]->socket = socket;
+        pollitem->items[ pollitem->item_count ]->events = events;
+        pollitem->callbacks[ pollitem->item_count ] = SvREFCNT_inc(callback);
+        asprintf(
+            &id,
+            "%p-%d-%p",
+            socket,
+            events,
+            SvRV(callback)
+        );
+        pollitem->item_ids[ pollitem->item_count ] = id;
+        pollitem->item_count++;
+
+        /* Return a guard object that will destroy this poll item
+         * once the guard object is garbage collected
+         */
+
+        {
+            dSP;
+            int count;
+
+            ENTER;
+            SAVETMPS;
+            PUSHMARK(SP);
+            mXPUSHp( "ZeroMQ::PollItem::Guard", 23 );
+            mXPUSHp( "pollitem", 8 );
+            mXPUSHs( newSVsv( pollitem_sv ) );
+            mXPUSHp( "id", 2 );
+            mXPUSHp( 
+                pollitem->item_ids[ pollitem->item_count - 1 ],
+                strlen(pollitem->item_ids[ pollitem->item_count - 1 ])
+            );
+            PUTBACK;
+
+            count = call_pv( "ZeroMQ::PollItem::Guard::new", G_SCALAR );
+            SPAGAIN;
+
+            if (count != 1)
+                croak("Couldnot create ZeroMQ::PollItem::Guard object");
+
+            guard = newSVsv(POPs);
+
+            PUTBACK;
+            FREETMPS;
+            LEAVE;
+        }
+        RETVAL = guard;
+    OUTPUT:
+        RETVAL
+
+#define MAX_POLL_ITEMS 8192
+IV
+PerlZMQ_PollItem_poll( pollitem, timeout = 0)
+        PerlZMQ_PollItem *pollitem;
+        int timeout;
+    PREINIT:
+        int i;
+        int polled = 0;
+        zmq_pollitem_t to_poll_items[MAX_POLL_ITEMS];
+        zmq_pollitem_t items[MAX_POLL_ITEMS];
+        SV *callbacks[MAX_POLL_ITEMS];
+    CODE:
+        for( i = 0; i < pollitem->item_count && i < MAX_POLL_ITEMS; i++) {
+            to_poll_items[i].socket = pollitem->items[i]->socket;
+            to_poll_items[i].events = pollitem->items[i]->events;
+            to_poll_items[i].revents = 0;
+        }
+
+        RETVAL = zmq_poll( to_poll_items, pollitem->item_count, timeout );
+        if (RETVAL == 0) {
+            XSRETURN(0);
+        } else {
+            for( i = 0; i < pollitem->item_count && i < MAX_POLL_ITEMS; i++) {
+                zmq_pollitem_t item = to_poll_items[i];
+                if (item.revents & item.events) {
+                    items[polled].socket = to_poll_items[i].socket;
+                    items[polled].events = to_poll_items[i].events;
+                    items[polled].revents = to_poll_items[i].revents;
+                    callbacks[polled] = pollitem->callbacks[i];
+                    if (! SvOK(callbacks[polled]))
+                        croak("Bad callback: SvOK == 0");
+                    if (! SvROK(callbacks[polled]))
+                        croak("Bad callback: SvROK == 0");
+                    if (SvTYPE( SvRV( callbacks[polled] ) ) != SVt_PVCV )
+                        croak("Bad callback: SV != SVt_PVCV");
+
+                    polled++;
+                }
+            }
+
+            for( i = 0; i < polled; i++ ) {
+                zmq_pollitem_t item = items[i];
+
+                if (item.revents & ZMQ_POLLIN) {
+                    SV *msg_sv;
+                    zmq_msg_t *msg;
+                    zmq_msg_init(msg);
+
+                    if (zmq_recv( item.socket, msg, ZMQ_NOBLOCK ) != 0) {
+                        croak("read failed");
+                    }
+
+                    {
+                        dSP;
+
+                        ENTER;
+                        SAVETMPS;
+                        PUSHMARK(SP);
+                        mXPUSHp( "ZeroMQ::Message", 15 );
+                        mXPUSHp( (char *) zmq_msg_data(msg), zmq_msg_size(msg) );
+                        PUTBACK;
+
+                        call_pv( "ZeroMQ::Message::new", G_SCALAR );
+                        SPAGAIN;
+
+                        msg_sv = newSVsv( POPs );
+                        PUTBACK;
+                        FREETMPS;
+                        LEAVE;
+                    }
+
+                    {
+                        dSP;
+                        ENTER;
+                        SAVETMPS;
+                        PUSHMARK(SP);
+                        mXPUSHs( msg_sv );
+                        PUTBACK;
+
+                        call_sv( callbacks[i], G_SCALAR );
+                        SPAGAIN;
+
+                        PUTBACK;
+                        FREETMPS;
+                        LEAVE;
+                    }
+
+                    zmq_msg_close(msg);
+                } else {
+                    croak("Unknown poll type: %d",item.revents);
+                }
+            }
+        }
+    OUTPUT:
+        RETVAL
+
