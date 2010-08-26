@@ -792,7 +792,7 @@ PerlZMQ_PollItem_poll( pollitem, timeout = 0)
         int i;
         int polled = 0;
         zmq_pollitem_t to_poll_items[MAX_POLL_ITEMS];
-        zmq_pollitem_t items[MAX_POLL_ITEMS];
+        zmq_pollitem_t x_items[MAX_POLL_ITEMS];
         SV *callbacks[MAX_POLL_ITEMS];
     CODE:
         for( i = 0; i < pollitem->item_count && i < MAX_POLL_ITEMS; i++) {
@@ -808,9 +808,9 @@ PerlZMQ_PollItem_poll( pollitem, timeout = 0)
             for( i = 0; i < pollitem->item_count && i < MAX_POLL_ITEMS; i++) {
                 zmq_pollitem_t item = to_poll_items[i];
                 if (item.revents & item.events) {
-                    items[polled].socket = to_poll_items[i].socket;
-                    items[polled].events = to_poll_items[i].events;
-                    items[polled].revents = to_poll_items[i].revents;
+                    x_items[polled].socket = to_poll_items[i].socket;
+                    x_items[polled].events = to_poll_items[i].events;
+                    x_items[polled].revents = to_poll_items[i].revents;
                     callbacks[polled] = pollitem->callbacks[i];
                     if (! SvOK(callbacks[polled]))
                         croak("Bad callback: SvOK == 0");
@@ -824,11 +824,12 @@ PerlZMQ_PollItem_poll( pollitem, timeout = 0)
             }
 
             for( i = 0; i < polled; i++ ) {
-                zmq_pollitem_t item = items[i];
+                zmq_pollitem_t item = x_items[i];
 
                 if (item.revents & ZMQ_POLLIN) {
                     SV *msg_sv;
                     zmq_msg_t *msg;
+                    Newxz( msg, 1, zmq_msg_t );
                     zmq_msg_init(msg);
 
                     if (zmq_recv( item.socket, msg, ZMQ_NOBLOCK ) != 0) {
@@ -871,6 +872,7 @@ PerlZMQ_PollItem_poll( pollitem, timeout = 0)
                     }
 
                     zmq_msg_close(msg);
+                    Safefree(msg);
                 } else if (item.revents & ZMQ_POLLOUT) {
                     /* for writes, we don't prepare anything.. we just
                      * let the user deal with it
