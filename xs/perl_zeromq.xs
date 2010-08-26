@@ -871,6 +871,24 @@ PerlZMQ_PollItem_poll( pollitem, timeout = 0)
                     }
 
                     zmq_msg_close(msg);
+                } else if (item.revents & ZMQ_POLLOUT) {
+                    /* for writes, we don't prepare anything.. we just
+                     * let the user deal with it
+                     */
+                    {
+                        dSP;
+                        ENTER;
+                        SAVETMPS;
+                        PUSHMARK(SP);
+                        PUTBACK;
+
+                        call_sv( callbacks[i], G_SCALAR );
+                        SPAGAIN;
+
+                        PUTBACK;
+                        FREETMPS;
+                        LEAVE;
+                    }
                 } else {
                     croak("Unknown poll type: %d",item.revents);
                 }
