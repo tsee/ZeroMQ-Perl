@@ -1,8 +1,11 @@
 #include "perl_zeromq.h"
 
+#ifdef USE_ITHREADS
 #define PerlZMQ_Context_inc(ctxt) (ctxt->count++)
 #define PerlZMQ_Context_dec(ctxt) (ctxt->count--)
 #define PerlZMQ_Context_count(ctxt) (ctxt->count)
+#endif
+
 #define PerlZMQ_Context_ctxt(ctxt) (ctxt->ctxt)
 #define PerlZMQ_Context_term(ctxt) (zmq_term(ctxt->ctxt))
 
