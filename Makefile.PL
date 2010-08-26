@@ -1,16 +1,6 @@
 use inc::Module::Install;
 use File::Spec;
 
-{
-    my $file = File::Spec->catfile('xs', 'const-xs.inc');
-    write_constants_file( $file ) if ! -f $file;
-}
-
-{
-    my $file = File::Spec->catfile('xs', 'typemap');
-    write_typemap( $file ) if ! -f $file;
-}
-
 name 'ZeroMQ';
 all_from 'lib/ZeroMQ.pm';
 
@@ -25,6 +15,11 @@ cc_src_paths 'xs';
 
 author_tests 'xt';
 WriteAll;
+
+if ($Module::Install::AUTHOR) {
+    write_constants_file( File::Spec->catfile('xs', 'const-xs.inc') );
+    write_typemap( File::Spec->catfile('xs', 'typemap') );
+}
 
 sub write_constants_file {
     my $file = shift;
