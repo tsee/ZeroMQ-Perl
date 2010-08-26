@@ -208,14 +208,18 @@ your application, use a name that's different from 'json'.
 
 =head1 ASYNCHRONOUS I/O WITH ZEROMQ
 
+By default ZeroMQ comes with its own poll() mechanism that can handle
+non-blocking sockets. You can use this by creating a ZeroMQ::PollItem
+object:
 
-    use AnyEvent::ZeroMQ;
+    my $pi = ZeroMQ::PollItem->new;
+    $pi->add( $zmq_socket, ZMQ_POLLIN, sub {
+        ....
+    } );
 
-    AE::zmq_recv $socket, sub {
-        my $message = shift;
-    };
-    
-    ZeroMQ::poll
+Unfortunately this custom polling scheme doesn't play too well with AnyEvent.
+If you have ideas on how to make this work, please feel free to fork and
+play with the source code (see the relevant CPAN pages for the repo URL)
 
 =head1 FUNCTIONS
 
