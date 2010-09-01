@@ -739,13 +739,15 @@ PerlZMQ_PollItem_add( pollitem, socket, events, callback )
         pollitem->items[ pollitem->item_count ]->socket = socket;
         pollitem->items[ pollitem->item_count ]->events = events;
         pollitem->callbacks[ pollitem->item_count ] = SvREFCNT_inc(callback);
-        asprintf(
+        if (asprintf(
             &id,
             "%p-%d-%p",
             socket,
             events,
             SvRV(callback)
-        );
+        ) == -1) {
+            croak("Failed to allocate ID for callback");
+        }
         pollitem->item_ids[ pollitem->item_count ] = id;
         pollitem->item_count++;
 
