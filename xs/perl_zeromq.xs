@@ -78,7 +78,9 @@ static MGVTBL PerlZMQ_Context_vtbl = { /* for identity */
     PerlZMQ_Context_free, /* free */
     NULL, /* copy */
     PerlZMQ_Context_mg_dup, /* dup */
+#ifdef MGf_LOCAL
     NULL,  /* local */
+#endif
 };
 
 static int
@@ -130,7 +132,9 @@ static MGVTBL PerlZMQ_Socket_vtbl = { /* for identity */
     PerlZMQ_Socket_free, /* free */
     NULL, /* copy */
     PerlZMQ_Socket_mg_dup, /* dup */
+#ifdef MGf_LOCAL
     NULL,  /* local */
+#endif
 };
 
 static int
@@ -189,7 +193,9 @@ static MGVTBL PerlZMQ_Message_vtbl = { /* for identity */
     PerlZMQ_Message_free, /* free */
     NULL, /* copy */
     PerlZMQ_Message_mg_dup, /* dup */
+#ifdef MGf_LOCAL
     NULL,  /* local */
+#endif
 };
 
 static void
@@ -336,7 +342,9 @@ static MGVTBL PerlZMQ_PollItem_vtbl = { /* for identity */
     PerlZMQ_PollItem_free, /* free */
     NULL, /* copy */
     NULL, /* dup */
+#ifdef MGf_local
     NULL,  /* local */
+#endif
 };
 
 
