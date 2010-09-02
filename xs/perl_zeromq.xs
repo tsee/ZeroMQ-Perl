@@ -342,7 +342,7 @@ static MGVTBL PerlZMQ_PollItem_vtbl = { /* for identity */
     PerlZMQ_PollItem_free, /* free */
     NULL, /* copy */
     NULL, /* dup */
-#ifdef MGf_local
+#ifdef MGf_LOCAL
     NULL,  /* local */
 #endif
 };
