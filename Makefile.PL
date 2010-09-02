@@ -2,7 +2,17 @@ use inc::Module::Install;
 use File::Spec;
 
 name 'ZeroMQ';
-all_from 'lib/ZeroMQ.pm';
+
+{ # M::I is silly about multiple authors:
+    my $mainpm = 'lib/ZeroMQ.pm';
+    name_from $mainpm;
+    version_from $mainpm;
+    perl_version_from $mainpm;
+    license_from $mainpm;
+    abstract_from $mainpm;
+    author 'Daisuke Maki <daisuke@endeworks.jp>';
+    author 'Steffen Mueller <smueller@cpan.org>';
+}
 
 test_requires 'Test::Requires';
 test_requires 'Test::Exception' => '0.29';

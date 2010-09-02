@@ -365,9 +365,9 @@ L<http://zeromq.org>
 
 =head1 AUTHOR
 
-Steffen Mueller, C<< <smueller@cpan.org> >>
-
 Daisuke Maki C<< <daisuke@endeworks.jp> >>
+
+Steffen Mueller, C<< <smueller@cpan.org> >>
 
 =head1 COPYRIGHT AND LICENSE
 
