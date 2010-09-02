@@ -671,11 +671,11 @@ PerlZMQ_Message_data(message)
     OUTPUT:
         RETVAL
 
-int
+SV *
 PerlZMQ_Message_size(message)
-        PerlZMQ_Message *message
+        PerlZMQ_Message *message;
     CODE:
-        RETVAL = zmq_msg_size(message);
+        RETVAL = newSVuv(zmq_msg_size(message));
     OUTPUT:
         RETVAL
 
@@ -909,14 +909,6 @@ PerlZMQ_PollItem_poll( pollitem, timeout = 0)
                 }
             }
         }
-    OUTPUT:
-        RETVAL
-
-SV *
-PerlZMQ_Message_size(message)
-        PerlZMQ_Message *message;
-    CODE:
-        RETVAL = newSVuv(zmq_msg_size(message));
     OUTPUT:
         RETVAL
 
