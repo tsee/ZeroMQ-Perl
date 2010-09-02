@@ -5,7 +5,7 @@ name 'ZeroMQ';
 all_from 'lib/ZeroMQ.pm';
 
 test_requires 'Test::Requires';
-test_requires 'Test::Exception';
+test_requires 'Test::Exception' => '0.29';
 recommends 'JSON' => '2.00';
 
 use_ppport;
