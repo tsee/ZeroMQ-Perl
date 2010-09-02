@@ -24,12 +24,12 @@ pass();
 {
   my $cxt = ZeroMQ::Context->new;
   isa_ok($cxt, 'ZeroMQ::Context');
-  my $sock = ZeroMQ::Socket->new($cxt, ZMQ_UPSTREAM); # Receiver
+  my $sock = $cxt->socket(ZMQ_UPSTREAM); # Receiver
   isa_ok($sock, 'ZeroMQ::Socket');
 
   { # too early, server socket not created:
     my $cxt = ZeroMQ::Context->new(1);
-    my $client = ZeroMQ::Socket->new($cxt, ZMQ_DOWNSTREAM); # sender
+    my $client = $cxt->socket(ZMQ_DOWNSTREAM); # sender
     eval { $client->connect("inproc://myPrivateSocket"); };
     ok($@ && "$@" =~ /Connection refused/);
   }
@@ -37,7 +37,7 @@ pass();
   $sock->bind("inproc://myPrivateSocket");
   pass();
 
-  my $client = ZeroMQ::Socket->new($cxt, ZMQ_DOWNSTREAM); # sender
+  my $client = $cxt->socket(ZMQ_DOWNSTREAM); # sender
   $client->connect("inproc://myPrivateSocket");
   pass("alive after connect");
 
@@ -72,7 +72,7 @@ pass();
 
 {
   my $cxt = ZeroMQ::Context->new(0); # must be 0 theads for in-process bind
-  my $sock = ZeroMQ::Socket->new($cxt, ZMQ_REP); # server like reply socket
+  my $sock = $cxt->socket(ZMQ_REP); # server like reply socket
   eval {$sock->bind("bulls***");};
   ok($@ && "$@" =~ /Invalid argument/);
 }
