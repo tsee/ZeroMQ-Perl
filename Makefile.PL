@@ -1,4 +1,38 @@
-use inc::Module::Install;
+BEGIN {
+    # Okay, so some people wanting to check out the latest and greatest
+    # version from github is getting stuck not knowing what M::I modules
+    # to install. So do the check here
+    eval {
+        require inc::Module::Install;
+        require Module::Install::AuthorTests;
+        require Module::Install::ReadmeFromPod;
+        require Module::Install::XSUtil;
+    };
+    if ($@) {
+        print STDERR <<EOM;
+
+**** Missing Developer Tools! ****
+
+Whoa there, you don't have the required modules to run this Makefile.PL!
+This probably means you cloned the repository from github (if you
+encounter this from a tarball uploaded to CPAN, it's a bug, so please
+report it).
+
+If you are running from a cloned git repository, install the following
+modules first:
+
+    * Module::Install
+    * Module::Install::AuthorTests
+    * Module::Install::ReadmeFromPod
+    * Module::Install::XSUtil
+
+and try again.
+EOM
+        exit 0;
+    }
+    Module::Install->import;
+}
+
 use File::Spec;
 
 name 'ZeroMQ';
