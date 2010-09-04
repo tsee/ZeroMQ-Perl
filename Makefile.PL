@@ -44,6 +44,7 @@ name 'ZeroMQ';
     perl_version_from $mainpm;
     license_from $mainpm;
     abstract_from $mainpm;
+    readme_from $mainpm;
     author 'Daisuke Maki <daisuke@endeworks.jp>';
     author 'Steffen Mueller <smueller@cpan.org>';
 }
