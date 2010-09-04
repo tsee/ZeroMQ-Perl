@@ -185,14 +185,15 @@ ZeroMQ.pm comes with a simple serialization/deserialization mechanism.
 
 To serialize, use C<register_write_type()> to register a name and an
 associated callback to serialize the data. For example, for JSON we do
-the following:
+the following (this is already done for you in ZeroMQ.pm if you have
+JSON.pm installed):
 
     use JSON ();
     ZeroMQ::register_write_type('json' => \&JSON::encode_json);
     ZeroMQ::register_read_type('json' => \&JSON::decode_json);
 
-Then you can use C<send_as()> and C<recv_as()> to specify the serialization type as the
-first argument:
+Then you can use C<send_as()> and C<recv_as()> to specify the serialization 
+type as the first argument:
 
     my $ctxt = ZeroMQ::Context->new();
     my $sock = $ctxt->socket( ZMQ_REQ );

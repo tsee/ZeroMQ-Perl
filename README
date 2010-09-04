@@ -78,7 +78,8 @@ SERIALIZATION
 
     To serialize, use "register_write_type()" to register a name and an
     associated callback to serialize the data. For example, for JSON we do
-    the following:
+    the following (this is already done for you in ZeroMQ.pm if you have
+    JSON.pm installed):
 
         use JSON ();
         ZeroMQ::register_write_type('json' => \&JSON::encode_json);
