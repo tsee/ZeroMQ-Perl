@@ -1,5 +1,17 @@
 Changelog for Perl module ZeroMQ.
 
+0.02_01 Mon Sep 06 2010 19:20 JST
+  - Releasing a dev release to get some test coverage
+  - Add zmq_poll support via ZeroMQ::PollItem
+  - Lots of doc fixes
+  - Lots of test fixes
+  - For people cloning from github, tell them what Module::Install
+    modules you need to install
+  - Loudly tell the user that you're going to get a blocking socket
+    even if you send a SIGINT/SIGTERM while it's in recv().
+    This is a problem in libzmq, and it is planned to be fixed on
+    libzmq 2.1.x
+
 0.02  Sat Aug 22 2010 09:00 JST
   - Changes from 0.01_01 to 0.02 were tested against zeromq-2.0.7
   - Implement version()
