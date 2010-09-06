@@ -164,7 +164,6 @@ EXPORTS
 
     The exportable constants are:
 
-EXPORTS
   ":socket" - Socket types and socket options
     ZMQ_PAIR
     ZMQ_PUB
