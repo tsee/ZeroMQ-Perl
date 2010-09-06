@@ -12,7 +12,7 @@ use strict;
 # doesn't play nicely with Test::SharedFork
 use Test::More;
 use threads;
-use Test::TCP;
+use Test::Requires 'Test::TCP';
 
 BEGIN {
     use_ok "ZeroMQ", qw(ZMQ_REQ ZMQ_XREQ ZMQ_XREP ZMQ_REQ ZMQ_REP ZMQ_QUEUE);
