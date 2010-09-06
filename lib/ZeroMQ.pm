@@ -278,8 +278,6 @@ C<use ZeroMQ> call as shown in the synopsis above.
 
 The exportable constants are:
 
-=head1 EXPORTS
-
 =head2 C<:socket> - Socket types and socket options
 
 =over 4
