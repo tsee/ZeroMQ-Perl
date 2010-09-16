@@ -305,7 +305,7 @@ PerlZMQ_PollItem_mg_find(pTHX_ SV* const sv, const MGVTBL* const vtbl){
         }
     }
 
-    croak("ZeroMQ::PollItem: Invalid ZeroMQ::Message object was passed to mg_find");
+    croak("ZeroMQ::PollItem: Invalid ZeroMQ::PollItem object was passed to mg_find");
     return NULL; /* not reached */
 }
 static int
@@ -817,73 +817,63 @@ PerlZMQ_PollItem_poll( pollitem, timeout = 0)
         RETVAL = zmq_poll( to_poll_items, pollitem->item_count, timeout );
         if (RETVAL == 0) {
             XSRETURN(0);
-        } else {
-            for( i = 0; i < pollitem->item_count && i < MAX_POLL_ITEMS; i++) {
-                zmq_pollitem_t item = to_poll_items[i];
-                if (item.revents & item.events) {
-                    x_items[polled].socket = to_poll_items[i].socket;
-                    x_items[polled].events = to_poll_items[i].events;
-                    x_items[polled].revents = to_poll_items[i].revents;
-                    callbacks[polled] = pollitem->callbacks[i];
-                    if (! SvOK(callbacks[polled]))
-                        croak("Bad callback: SvOK == 0");
-                    if (! SvROK(callbacks[polled]))
-                        croak("Bad callback: SvROK == 0");
-                    if (SvTYPE( SvRV( callbacks[polled] ) ) != SVt_PVCV )
-                        croak("Bad callback: SV != SVt_PVCV");
+        }
 
-                    polled++;
-                }
+        for( i = 0; i < pollitem->item_count && i < MAX_POLL_ITEMS; i++) {
+            zmq_pollitem_t item = to_poll_items[i];
+            if (item.revents & item.events) {
+                x_items[polled].socket = to_poll_items[i].socket;
+                x_items[polled].events = to_poll_items[i].events;
+                x_items[polled].revents = to_poll_items[i].revents;
+                callbacks[polled] = pollitem->callbacks[i];
+                if (! SvOK(callbacks[polled]))
+                    croak("Bad callback: SvOK == 0");
+                if (! SvROK(callbacks[polled]))
+                    croak("Bad callback: SvROK == 0");
+                if (SvTYPE( SvRV( callbacks[polled] ) ) != SVt_PVCV )
+                    croak("Bad callback: SV != SVt_PVCV");
+
+                polled++;
             }
+        }
+        for( i = 0; i < polled; i++ ) {
+            zmq_pollitem_t item = x_items[i];
 
-            for( i = 0; i < polled; i++ ) {
-                zmq_pollitem_t item = x_items[i];
+            if (item.revents & ZMQ_POLLIN) {
+                {
+                    dSP;
+                    ENTER;
+                    SAVETMPS;
+                    PUSHMARK(SP);
+                    PUTBACK;
 
-                if (item.revents & ZMQ_POLLIN) {
-                    SV *msg_sv;
-                    zmq_msg_t *msg;
-                    Newxz( msg, 1, zmq_msg_t );
-                    zmq_msg_init(msg);
+                    call_sv( callbacks[i], G_SCALAR );
+                    SPAGAIN;
 
-                    {
-                        dSP;
-                        ENTER;
-                        SAVETMPS;
-                        PUSHMARK(SP);
-                        mXPUSHs( msg_sv );
-                        PUTBACK;
-
-                        call_sv( callbacks[i], G_SCALAR );
-                        SPAGAIN;
-
-                        PUTBACK;
-                        FREETMPS;
-                        LEAVE;
-                    }
-
-                    zmq_msg_close(msg);
-                    Safefree(msg);
-                } else if (item.revents & ZMQ_POLLOUT) {
-                    /* for writes, we don't prepare anything.. we just
-                     * let the user deal with it
-                     */
-                    {
-                        dSP;
-                        ENTER;
-                        SAVETMPS;
-                        PUSHMARK(SP);
-                        PUTBACK;
-
-                        call_sv( callbacks[i], G_SCALAR );
-                        SPAGAIN;
-
-                        PUTBACK;
-                        FREETMPS;
-                        LEAVE;
-                    }
-                } else {
-                    croak("Unknown poll type: %d",item.revents);
+                    PUTBACK;
+                    FREETMPS;
+                    LEAVE;
                 }
+            } else if (item.revents & ZMQ_POLLOUT) {
+                /* for writes, we don't prepare anything.. we just
+                 * let the user deal with it
+                 */
+                {
+                    dSP;
+                    ENTER;
+                    SAVETMPS;
+                    PUSHMARK(SP);
+                    PUTBACK;
+
+                    call_sv( callbacks[i], G_SCALAR );
+                    SPAGAIN;
+
+                    PUTBACK;
+                    FREETMPS;
+                    LEAVE;
+                }
+            } else {
+                croak("Unknown poll type: %d",item.revents);
             }
         }
     OUTPUT:
