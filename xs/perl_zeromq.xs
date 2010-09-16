@@ -845,29 +845,6 @@ PerlZMQ_PollItem_poll( pollitem, timeout = 0)
                     Newxz( msg, 1, zmq_msg_t );
                     zmq_msg_init(msg);
 
-                    if (zmq_recv( item.socket, msg, ZMQ_NOBLOCK ) != 0) {
-                        croak("read failed");
-                    }
-
-                    {
-                        dSP;
-
-                        ENTER;
-                        SAVETMPS;
-                        PUSHMARK(SP);
-                        mXPUSHp( "ZeroMQ::Message", 15 );
-                        mXPUSHp( (char *) zmq_msg_data(msg), zmq_msg_size(msg) );
-                        PUTBACK;
-
-                        call_pv( "ZeroMQ::Message::new", G_SCALAR );
-                        SPAGAIN;
-
-                        msg_sv = newSVsv( POPs );
-                        PUTBACK;
-                        FREETMPS;
-                        LEAVE;
-                    }
-
                     {
                         dSP;
                         ENTER;

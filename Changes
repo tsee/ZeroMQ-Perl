@@ -1,5 +1,10 @@
 Changelog for Perl module ZeroMQ.
 
+0.02_02
+  - ZMQ_POLLIN callbacks used to pass the ZeroMQ::Message argument
+    to the callback, but this is error prone, so now the callback
+    does not receive anything
+
 0.02_01 Mon Sep 06 2010 19:20 JST
   - Releasing a dev release to get some test coverage
   - Add zmq_poll support via ZeroMQ::PollItem
