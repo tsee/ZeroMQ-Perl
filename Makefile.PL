@@ -27,6 +27,13 @@ modules first:
     * Module::Install::XSUtil
 
 and try again.
+
+While you're at it, install these modules as they are needed to run
+the tests:
+
+    * Test::Requires
+    * Test::Exception (at least 0.29)
+
 EOM
         exit 0;
     }
