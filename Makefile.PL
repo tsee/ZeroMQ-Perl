@@ -101,7 +101,7 @@ sub write_constants_file {
 
 
     while (my $ln = <$in>) {
-        if ($ln =~ /^\#define\s+(ZMQ_\S+)\s+/) {
+        if ($ln =~ /^\#define\s+(ZMQ_[A-Z0-9_]+)\s+/) {
             print $out "        $1 = $1\n";
         }
     }
