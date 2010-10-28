@@ -6,12 +6,21 @@
 #include "ppport.h"
 #include "zmq.h"
 
+struct PerlZMQ_Context_t;
+
 typedef struct {
     void *ctxt;
     unsigned int count;
-} PerlZMQ_Context ;
+    unsigned int socket_bufsiz;
+    unsigned int socket_count;
+    struct PerlZMQ_Socket_t **sockets;
+} PerlZMQ_Context;
 
-typedef void PerlZMQ_Socket;
+typedef struct PerlZMQ_Socket_t {
+    void *socket;
+    PerlZMQ_Context *ctxt;
+} PerlZMQ_Socket;
+
 typedef zmq_msg_t PerlZMQ_Message;
 
 typedef struct {

@@ -19,7 +19,7 @@ $port ||= 5566;
 my $ctxt = ZeroMQ::Context->new();
 my $sock = $ctxt->socket(ZMQ_SUB);
 $sock->connect( "tcp://$host:$port" );
-$sock->setsockopt(ZMQ_SUBSCRIBE, "W");
+$sock->setsockopt(ZMQ_SUBSCRIBE, "H");
 
 while (1) {
     my $message = $sock->recv();

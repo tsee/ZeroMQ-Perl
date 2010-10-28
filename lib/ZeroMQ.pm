@@ -21,6 +21,12 @@ our %EXPORT_TAGS = (
         ZMQ_PUSH
         ZMQ_UPSTREAM
         ZMQ_DOWNSTREAM
+        ZMQ_BACKLOG
+        ZMQ_FD
+        ZMQ_LINGER
+        ZMQ_EVENTS
+        ZMQ_RECONNECT_IVL
+        ZMQ_TYPE
     ),
 # socket send/recv flags
     qw(
@@ -68,11 +74,20 @@ our %EXPORT_TAGS = (
     qw(
         ZMQ_MSG_MORE
         ZMQ_MSG_SHARED
-    ), ]
+    ),]
 );
 
 $EXPORT_TAGS{all} = [ map { @$_ } values %EXPORT_TAGS ];
-our @EXPORT_OK = ( 'ZMQ_HAUSNUMERO', @{ $EXPORT_TAGS{'all'} } );
+our @EXPORT_OK = (
+    qw(
+        ZMQ_HAUSNUMERO
+        ZMQ_VERSION
+        ZMQ_VERSION_MAJOR
+        ZMQ_VERSION_MINOR
+        ZMQ_VERSION_PATCH
+    ),
+    @{ $EXPORT_TAGS{'all'} }
+);
 our @EXPORT = qw();
 
 require XSLoader;
@@ -304,6 +319,18 @@ The exportable constants are:
 
 =item ZMQ_DOWNSTREAM
 
+=item ZMQ_BACKLOG
+
+=item ZMQ_FD
+
+=item ZMQ_LINGER
+
+=item ZMQ_EVENTS
+
+=item ZMQ_RECONNECT_IVL
+
+=item ZMQ_TYPE
+
 =item ZMQ_NOBLOCK
 
 =item ZMQ_SNDMORE
@@ -373,6 +400,14 @@ The exportable constants are:
 =over 4
 
 =item ZMQ_HAUSNUMERO
+
+=item ZMQ_VERSION
+
+=item ZMQ_VERSION_MAJOR
+
+=item ZMQ_VERSION_MINOR
+
+=item ZMQ_VERSION_PATCH
 
 =back
 

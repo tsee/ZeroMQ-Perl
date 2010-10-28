@@ -20,8 +20,10 @@ my $ctxt = ZeroMQ::Context->new();
 my $sock = $ctxt->socket(ZMQ_PUB);
 $sock->bind( "tcp://$host:$port" );
 
+my $count = 0;
 while (1) {
-    $sock->send("HELLO?");
-    $sock->send("WORLD?");
+    $count++;
+    $sock->send("HELLO? $count");
+    $sock->send("WORLD? $count");
     sleep 2;
 }

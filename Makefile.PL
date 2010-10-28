@@ -59,6 +59,7 @@ name 'ZeroMQ';
 test_requires 'Test::Requires';
 test_requires 'Test::Exception' => '0.29';
 recommends 'JSON' => '2.00';
+use_xshelper '-clean';
 
 use_ppport;
 cc_warnings;
