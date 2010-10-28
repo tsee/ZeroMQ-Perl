@@ -586,6 +586,10 @@ PerlZMQ_Socket_getsockopt(socket, option_name)
                 sv_setuv(RETVAL, rv);
             }
             break;
+        default:
+            {
+                croak("Unknown option passed to getsockopt");
+            }
         };
     OUTPUT:
         RETVAL
