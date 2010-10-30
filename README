@@ -176,6 +176,12 @@ EXPORTS
     ZMQ_PUSH
     ZMQ_UPSTREAM
     ZMQ_DOWNSTREAM
+    ZMQ_BACKLOG
+    ZMQ_FD
+    ZMQ_LINGER
+    ZMQ_EVENTS
+    ZMQ_RECONNECT_IVL
+    ZMQ_TYPE
     ZMQ_NOBLOCK
     ZMQ_SNDMORE
     ZMQ_HWM
@@ -208,6 +214,10 @@ EXPORTS
 
   miscellaneous
     ZMQ_HAUSNUMERO
+    ZMQ_VERSION
+    ZMQ_VERSION_MAJOR
+    ZMQ_VERSION_MINOR
+    ZMQ_VERSION_PATCH
 
 CAVEATS
     This is an early release. Proceed with caution, please report (or better
