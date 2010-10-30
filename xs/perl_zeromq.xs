@@ -481,7 +481,7 @@ PerlZMQ_Socket_new(class_sv, ctxt, socktype)
         if (ctxt == NULL)
             croak("Invalid ZeroMQ::Context passed to ZeroMQ::Socket->new");
 
-        RETVAL = PerlZMQ_Socket_create(ctxt, socktype);
+        RETVAL = PerlZMQ_Socket_create(aTHX_ ctxt, socktype);
     OUTPUT:
         RETVAL
 
