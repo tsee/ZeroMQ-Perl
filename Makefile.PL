@@ -31,8 +31,9 @@ and try again.
 While you're at it, install these modules as they are needed to run
 the tests:
 
-    * Test::Requires
     * Test::Exception (at least 0.29)
+    * Test::Requires
+    * Test::TCP
 
 EOM
         exit 0;
@@ -56,6 +57,7 @@ name 'ZeroMQ';
     author 'Steffen Mueller <smueller@cpan.org>';
 }
 
+test_requires 'Test::TCP';
 test_requires 'Test::Requires';
 test_requires 'Test::Exception' => '0.29';
 recommends 'JSON' => '2.00';
