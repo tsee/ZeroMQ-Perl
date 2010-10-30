@@ -1,11 +1,39 @@
 package ZeroMQ;
 use 5.008;
 use strict;
+use Carp ();
 
-our $VERSION = '0.02_01';
-our @ISA = qw(Exporter);
 
 # TODO: keep in sync with docs below and Makefile.PL
+
+BEGIN {
+    our $VERSION = '0.02_01';
+    our @ISA = qw(Exporter);
+
+    require XSLoader;
+    XSLoader::load('ZeroMQ', $VERSION);
+
+    my @possibly_nonexistent = qw(
+        ZMQ_BACKLOG
+        ZMQ_FD
+        ZMQ_LINGER
+        ZMQ_EVENTS
+        ZMQ_RECONNECT_IVL
+        ZMQ_TYPE
+        ZMQ_VERSION
+        ZMQ_VERSION_MAJOR
+        ZMQ_VERSION_MINOR
+        ZMQ_VERSION_PATCH
+    );
+    my $version = version();
+    foreach my $symbol (@possibly_nonexistent) {
+        if (! __PACKAGE__->can($symbol) ) {
+            no strict 'refs';
+            *{$symbol} = sub { Carp::croak("$symbol is not available in zeromq2 $version") };
+
+        };
+    }
+}
 
 our %EXPORT_TAGS = (
 # socket types
@@ -90,8 +118,6 @@ our @EXPORT_OK = (
 );
 our @EXPORT = qw();
 
-require XSLoader;
-XSLoader::load('ZeroMQ', $VERSION);
 
 our %SERIALIZERS;
 our %DESERIALIZERS;
