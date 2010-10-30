@@ -66,6 +66,7 @@ use_xshelper '-clean';
 use_ppport;
 cc_warnings;
 cc_assert_lib 'zmq';
+cc_libs '-lzmq';
 if ($ENV{INCLUDES}) {
     cc_include_paths split/\s+/, $ENV{INCLUDES};
 }
