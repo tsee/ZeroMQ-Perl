@@ -168,12 +168,16 @@ ZeroMQ - A ZeroMQ2 wrapper for Perl
         $sock->send($msg);
     }
 
+    # json (if JSON.pm is available)
+    $sock->send_as( json => { foo => "bar" } );
+    my $thing = $sock->recv_as( "json" );
+
     # custom serialization
     ZeroMQ::register_read_type(myformat => sub { ... });
     ZeroMQ::register_write_type(myformat => sub { .. });
 
-    $socket->send_as( myformat => $data ); # serialize using above callback
-    my $thing = $socket->recv_as( "myformat" );
+    $sock->send_as( myformat => $data ); # serialize using above callback
+    my $thing = $sock->recv_as( "myformat" );
 
 See the F<eg/> directory for full examples.
 
