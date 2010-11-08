@@ -2,13 +2,20 @@ BEGIN {
     # Okay, so some people wanting to check out the latest and greatest
     # version from github is getting stuck not knowing what M::I modules
     # to install. So do the check here
-    eval {
-        require inc::Module::Install;
-        require Module::Install::AuthorTests;
-        require Module::Install::ReadmeFromPod;
-        require Module::Install::XSUtil;
-    };
-    if ($@) {
+    my @modules = qw(
+        inc::Module::Install
+        Module::Install::AuthorTests
+        Module::Install::ReadmeFromPod
+        Module::Install::TestTarget
+        Module::Install::XSUtil
+    );
+
+    my @missing;
+    foreach my $module (@modules) {
+        eval "require $module";
+        push @missing, $module if $@;
+    }
+    if (@missing) {
         print STDERR <<EOM;
 
 **** Missing Developer Tools! ****
@@ -20,12 +27,12 @@ report it).
 
 If you are running from a cloned git repository, install the following
 modules first:
-
-    * Module::Install
-    * Module::Install::AuthorTests
-    * Module::Install::ReadmeFromPod
-    * Module::Install::XSUtil
-
+EOM
+        foreach my $module (@missing) {
+            $module =~ s/^inc:://;
+            print "    * $module\n";
+        }
+        print STDERR <<EOM;
 and try again.
 
 While you're at it, install these modules as they are needed to run
@@ -75,6 +82,11 @@ if ($ENV{LIBS}) {
 }
 cc_src_paths 'xs';
 
+default_test_target 
+    env => {
+        LC_ALL => 'C'
+    }
+;
 author_tests 'xt';
 WriteAll;
 
