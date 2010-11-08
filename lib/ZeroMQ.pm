@@ -7,7 +7,7 @@ use Carp ();
 # TODO: keep in sync with docs below and Makefile.PL
 
 BEGIN {
-    our $VERSION = '0.02_01';
+    our $VERSION = '0.02_02';
     our @ISA = qw(Exporter);
 
     require XSLoader;
