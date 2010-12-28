@@ -1,7 +1,7 @@
 package ZeroMQ;
 use strict;
 BEGIN {
-    our $VERSION = '0.02_02';
+    our $VERSION = '0.02_03';
     our @ISA = qw(Exporter);
     require XSLoader;
     XSLoader::load('ZeroMQ', $VERSION);

@@ -1,8 +1,9 @@
 Changelog for Perl module ZeroMQ.
 
-0.02_03
+0.02_03 Tue Dec 28 2010 21:40 JST
   - Rework the internals to allow high level API (perl-ish, OO) and
     low level API (straight portof zeromq C binding), thanks to jrockway
+  - Remove PollItem in favor of getsockopt + ZMQ_FD. Holler if you need it back
 
 0.02_02 Sat Oct 30 2010 21:20 JST
   - Update to work with zeromq2 master (as of 10/28)
