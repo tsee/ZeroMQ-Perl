@@ -1,128 +1,34 @@
 package ZeroMQ;
-use 5.008;
 use strict;
-use Carp ();
-
-
-# TODO: keep in sync with docs below and Makefile.PL
-
 BEGIN {
     our $VERSION = '0.02_02';
     our @ISA = qw(Exporter);
-
     require XSLoader;
     XSLoader::load('ZeroMQ', $VERSION);
-
-    my @possibly_nonexistent = qw(
-        ZMQ_BACKLOG
-        ZMQ_FD
-        ZMQ_LINGER
-        ZMQ_EVENTS
-        ZMQ_RECONNECT_IVL
-        ZMQ_TYPE
-        ZMQ_VERSION
-        ZMQ_VERSION_MAJOR
-        ZMQ_VERSION_MINOR
-        ZMQ_VERSION_PATCH
-    );
-    my $version = version();
-    foreach my $symbol (@possibly_nonexistent) {
-        if (! __PACKAGE__->can($symbol) ) {
-            no strict 'refs';
-            *{$symbol} = sub { Carp::croak("$symbol is not available in zeromq2 $version") };
-
-        };
-    }
 }
 
-our %EXPORT_TAGS = (
-# socket types
-    socket => [ qw(
-        ZMQ_PAIR
-        ZMQ_PUB
-        ZMQ_SUB
-        ZMQ_REQ
-        ZMQ_REP
-        ZMQ_XREQ
-        ZMQ_XREP
-        ZMQ_PULL
-        ZMQ_PUSH
-        ZMQ_UPSTREAM
-        ZMQ_DOWNSTREAM
-        ZMQ_BACKLOG
-        ZMQ_FD
-        ZMQ_LINGER
-        ZMQ_EVENTS
-        ZMQ_RECONNECT_IVL
-        ZMQ_TYPE
-    ),
-# socket send/recv flags
-    qw(
-        ZMQ_NOBLOCK
-        ZMQ_SNDMORE
-    ),
-# get/setsockopt options
-    qw(
-        ZMQ_HWM
-        ZMQ_SWAP
-        ZMQ_AFFINITY
-        ZMQ_IDENTITY
-        ZMQ_SUBSCRIBE
-        ZMQ_UNSUBSCRIBE
-        ZMQ_RATE
-        ZMQ_RECOVERY_IVL
-        ZMQ_MCAST_LOOP
-        ZMQ_SNDBUF
-        ZMQ_RCVBUF
-        ZMQ_RCVMORE
-    ),
-# i/o multiplexing
-    qw(
-        ZMQ_POLLIN
-        ZMQ_POLLOUT
-        ZMQ_POLLERR
-    ),
-    ],
-# devices
-    device => [ qw(
-        ZMQ_QUEUE
-        ZMQ_FORWARDER
-        ZMQ_STREAMER
-    ), ],
-# max size of vsm message
-    message => [ qw(
-        ZMQ_MAX_VSM_SIZE
-    ),
-# message types
-    qw(
-        ZMQ_DELIMITER
-        ZMQ_VSM
-    ),
-# message flags
-    qw(
-        ZMQ_MSG_MORE
-        ZMQ_MSG_SHARED
-    ),]
-);
-
-$EXPORT_TAGS{all} = [ map { @$_ } values %EXPORT_TAGS ];
-our @EXPORT_OK = (
-    qw(
-        ZMQ_HAUSNUMERO
-        ZMQ_VERSION
-        ZMQ_VERSION_MAJOR
-        ZMQ_VERSION_MINOR
-        ZMQ_VERSION_PATCH
-    ),
-    @{ $EXPORT_TAGS{'all'} }
-);
-our @EXPORT = qw();
-
+use ZeroMQ::Context;
+use ZeroMQ::Socket;
+use ZeroMQ::Message;
+use ZeroMQ::Constants;
+use 5.008;
+use Carp ();
+use IO::Handle;
 
 our %SERIALIZERS;
 our %DESERIALIZERS;
 sub register_read_type { $DESERIALIZERS{$_[0]} = $_[1] }
 sub register_write_type { $SERIALIZERS{$_[0]} = $_[1] }
+
+sub import {
+    my $class = shift;
+    if (@_) {
+        ZeroMQ::Constants->export_to_level( 1, $class, @_ );
+    }
+}
+
+sub _get_serializer { $SERIALIZERS{$_[1]} }
+sub _get_deserializer { $DESERIALIZERS{$_[1]} }
 
 eval {
     require JSON;
@@ -130,10 +36,6 @@ eval {
     register_read_type(json => \&JSON::decode_json);
     register_write_type(json => \&JSON::encode_json);
 };
-
-sub ZeroMQ::Context::socket {
-    return ZeroMQ::Socket->new(@_); # $_[0] should contain the context
-}
 
 package
     ZeroMQ::PollItem::Guard;
@@ -153,7 +55,7 @@ __END__
 
 ZeroMQ - A ZeroMQ2 wrapper for Perl
 
-=head1 SYNOPSIS
+=head1 SYNOPSIS ( HIGH-LEVEL API )
 
     # echo server
     use ZeroMQ qw/:all/;
@@ -179,7 +81,29 @@ ZeroMQ - A ZeroMQ2 wrapper for Perl
     $sock->send_as( myformat => $data ); # serialize using above callback
     my $thing = $sock->recv_as( "myformat" );
 
-See the F<eg/> directory for full examples.
+=head1 SYNOPSIS ( LOW-LEVEL API )
+
+    use ZeroMQ::Raw;
+
+    my $ctxt = zmq_init($threads);
+    my $rv   = zmq_term($ctxt);
+
+    my $msg  = zmq_msg_init();
+    my $msg  = zmq_msg_init_size( $size );
+    my $msg  = zmq_msg_init_data( $data );
+    my $rv   = zmq_msg_close( $msg );
+    my $rv   = zmq_msg_move( $dest, $src );
+    my $rv   = zmq_msg_copy( $dest, $src );
+    my $data = zmq_msg_data( $msg );
+    my $size = zmq_msg_size( $msg);
+
+    my $sock = zmq_socket( $ctxt, $type );
+    my $rv   = zmq_close( $sock );
+    my $rv   = zmq_setsockopt( $socket, $option, $value );
+    my $val  = zmq_getsockopt( $socket, $option );
+    my $rv   = zmq_bind( $sock, $addr );
+    my $rv   = zmq_send( $sock, $msg, $flags );
+    my $msg  = zmq_recv( $sock, $flags );
 
 =head1 DESCRIPTION
 
@@ -315,136 +239,10 @@ The callback receives the data received from the socket.
 Register a write callback for a given C<$name>. This is used in C<send_as()>
 The callback receives the Perl structure given to C<send_as()>
 
-=head1 EXPORTS
-
-You may choose to import one or more (using the C<:all> import tag)
-constants into your namespace by supplying arguments to the
-C<use ZeroMQ> call as shown in the synopsis above.
-
-The exportable constants are:
-
-=head2 C<:socket> - Socket types and socket options
-
-=over 4
-
-=item ZMQ_PAIR
-
-=item ZMQ_PUB
-
-=item ZMQ_SUB
-
-=item ZMQ_REQ
-
-=item ZMQ_REP
-
-=item ZMQ_XREQ
-
-=item ZMQ_XREP
-
-=item ZMQ_PULL
-
-=item ZMQ_PUSH
-
-=item ZMQ_UPSTREAM
-
-=item ZMQ_DOWNSTREAM
-
-=item ZMQ_BACKLOG
-
-=item ZMQ_FD
-
-=item ZMQ_LINGER
-
-=item ZMQ_EVENTS
-
-=item ZMQ_RECONNECT_IVL
-
-=item ZMQ_TYPE
-
-=item ZMQ_NOBLOCK
-
-=item ZMQ_SNDMORE
-
-=item ZMQ_HWM
-
-=item ZMQ_SWAP
-
-=item ZMQ_AFFINITY
-
-=item ZMQ_IDENTITY
-
-=item ZMQ_SUBSCRIBE
-
-=item ZMQ_UNSUBSCRIBE
-
-=item ZMQ_RATE
-
-=item ZMQ_RECOVERY_IVL
-
-=item ZMQ_MCAST_LOOP
-
-=item ZMQ_SNDBUF
-
-=item ZMQ_RCVBUF
-
-=item ZMQ_RCVMORE
-
-=item ZMQ_POLLIN
-
-=item ZMQ_POLLOUT
-
-=item ZMQ_POLLERR
-
-=back
-
-=head2 C<:device> - Device types
-
-=over 4
-
-=item ZMQ_QUEUE
-
-=item ZMQ_FORWARDER
-
-=item ZMQ_STREAMER
-
-=back
-
-=head2 C<:message> - Message Options
-
-=over 4
-
-=item ZMQ_MAX_VSM_SIZE
-
-=item ZMQ_DELIMITER
-
-=item ZMQ_VSM
-
-=item ZMQ_MSG_MORE
-
-=item ZMQ_MSG_SHARED
-
-=back
-
-=head2 miscellaneous
-
-=over 4
-
-=item ZMQ_HAUSNUMERO
-
-=item ZMQ_VERSION
-
-=item ZMQ_VERSION_MAJOR
-
-=item ZMQ_VERSION_MINOR
-
-=item ZMQ_VERSION_PATCH
-
-=back
-
 =head1 CAVEATS
 
 This is an early release. Proceed with caution, please report
-(or better yet: fix) bugs you encounter. Tested againt 0MQ 2.0.8.
+(or better yet: fix) bugs you encounter. Tested againt 0MQ 2.1.0.
 
 =head1 SEE ALSO
 

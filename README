@@ -1,7 +1,7 @@
 NAME
     ZeroMQ - A ZeroMQ2 wrapper for Perl
 
-SYNOPSIS
+SYNOPSIS ( HIGH-LEVEL API )
         # echo server
         use ZeroMQ qw/:all/;
 
@@ -15,14 +15,39 @@ SYNOPSIS
             $sock->send($msg);
         }
 
+        # json (if JSON.pm is available)
+        $sock->send_as( json => { foo => "bar" } );
+        my $thing = $sock->recv_as( "json" );
+
         # custom serialization
         ZeroMQ::register_read_type(myformat => sub { ... });
         ZeroMQ::register_write_type(myformat => sub { .. });
 
-        $socket->send_as( myformat => $data ); # serialize using above callback
-        my $thing = $socket->recv_as( "myformat" );
+        $sock->send_as( myformat => $data ); # serialize using above callback
+        my $thing = $sock->recv_as( "myformat" );
 
-    See the eg/ directory for full examples.
+SYNOPSIS ( LOW-LEVEL API )
+        use ZeroMQ::Raw;
+
+        my $ctxt = zmq_init($threads);
+        my $rv   = zmq_term($ctxt);
+
+        my $msg  = zmq_msg_init();
+        my $msg  = zmq_msg_init_size( $size );
+        my $msg  = zmq_msg_init_data( $data );
+        my $rv   = zmq_msg_close( $msg );
+        my $rv   = zmq_msg_move( $dest, $src );
+        my $rv   = zmq_msg_copy( $dest, $src );
+        my $data = zmq_msg_data( $msg );
+        my $size = zmq_msg_size( $msg);
+
+        my $sock = zmq_socket( $ctxt, $type );
+        my $rv   = zmq_close( $sock );
+        my $rv   = zmq_setsockopt( $socket, $option, $value );
+        my $val  = zmq_getsockopt( $socket, $option );
+        my $rv   = zmq_bind( $sock, $addr );
+        my $rv   = zmq_send( $sock, $msg, $flags );
+        my $msg  = zmq_recv( $sock, $flags );
 
 DESCRIPTION
     The "ZeroMQ" module is a wrapper of the 0MQ message passing library for

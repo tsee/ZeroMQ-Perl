@@ -72,8 +72,6 @@ use_xshelper '-clean';
 
 use_ppport;
 cc_warnings;
-cc_assert_lib 'zmq';
-cc_libs '-lzmq';
 if ($ENV{INCLUDES}) {
     cc_include_paths split/\s+/, $ENV{INCLUDES};
 }
@@ -81,6 +79,7 @@ if ($ENV{LIBS}) {
     cc_libs $ENV{LIBS} . ' -lzmq';
 }
 cc_src_paths 'xs';
+cc_assert_lib 'zmq';
 
 default_test_target 
     env => {
@@ -134,44 +133,48 @@ sub write_constants_file {
 sub write_typemap {
     my $file = shift;
 
-    my @typemap = (
-        [ 'T_PERLZMQ_CONTEXT', 'PerlZMQ_Context', 'ZeroMQ::Context' ],
-        [ 'T_PERLZMQ_SOCKET', 'PerlZMQ_Socket', 'ZeroMQ::Socket' ],
-        [ 'T_PERLZMQ_MESSAGE', 'PerlZMQ_Message', 'ZeroMQ::Message' ],
-        [ 'T_PERLZMQ_POLLITEM', 'PerlZMQ_PollItem', 'ZeroMQ::PollItem' ],
+    my @perl_types = qw(
+        ZeroMQ::Raw::Context
+        ZeroMQ::Raw::Socket
+        ZeroMQ::Raw::Message
     );
 
     open( my $out, '>', $file ) or
         die "Could not open $file for writing: $!";
 
     my (@decl, @input, @output);
-    foreach my $map (@typemap) {
-        push @decl, "$map->[1]* $map->[0]";
+    foreach my $perl_type (@perl_types) {
+        my $c_type = $perl_type;
+        $c_type =~ s/::/_/g;
+        $c_type =~ s/^ZeroMQ_/PerlZMQ_/;
+        my $typemap_type = 'T_' . uc $c_type;
+
+        push @decl, "$c_type* $typemap_type";
         push @input, <<EOM;
-$map->[0]
+$typemap_type
     {
         MAGIC *mg;
         \$var = NULL;
         if (sv_isobject(\$arg)) {
-            mg = $map->[1]_mg_find(aTHX_ SvRV(\$arg), &$map->[1]_vtbl);
+            mg = ${c_type}_mg_find(aTHX_ SvRV(\$arg), &${c_type}_vtbl);
             if (mg) {
-                \$var = ($map->[1] *) mg->mg_ptr;
+                \$var = ($c_type *) mg->mg_ptr;
             }
         }
 
         if (\$var == NULL)
-            croak(\\"Invalid $map->[2] object (perhaps you've already closed it?)\\");
+            croak(\\"Invalid $perl_type object (perhaps you've already freed it?)\\");
     }
 EOM
         push @output, <<EOM;
-$map->[0]
+$typemap_type
         if (!\$var)          /* if null */
             SvOK_off(\$arg); /* then return as undef instead of reaf to undef */
         else {
             /* setup \$arg as a ref to a blessed hash hv */
             MAGIC *mg;
             HV *hv = newHV();
-            const char *classname = \\"$map->[2]\\";
+            const char *classname = \\"$perl_type\\";
             /* take (sub)class name to use from class_sv if appropriate */
             if (SvMAGICAL(class_sv))
                 mg_get(class_sv);
@@ -186,7 +189,7 @@ $map->[0]
 
             sv_setsv(\$arg, sv_2mortal(newRV_noinc((SV*)hv)));
             (void)sv_bless(\$arg, gv_stashpv(classname, TRUE));
-            mg = sv_magicext((SV*)hv, NULL, PERL_MAGIC_ext, &$map->[1]_vtbl, (char*) \$var, 0);
+            mg = sv_magicext((SV*)hv, NULL, PERL_MAGIC_ext, &${c_type}_vtbl, (char*) \$var, 0);
             mg->mg_flags |= MGf_DUP;
         }
 EOM

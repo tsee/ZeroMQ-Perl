@@ -4,24 +4,26 @@
 #include "perl.h"
 #include "XSUB.h"
 #include "ppport.h"
-#include "zmq.h"
+#include <zmq.h>
+#include <errno.h>
 
-struct PerlZMQ_Context_t;
+#define PERLZMQ_TRACE 0
+#define _ERRNO        errno
+#define SET_BANG      PerlZMQ_set_bang(aTHX_ _ERRNO)
 
+inline void PerlZQM_set_bang(pTHX_ int err);
+
+#ifndef USE_ITHREADS
+typedef void      PerlZMQ_Raw_Context;
+#else 
 typedef struct {
-    void *ctxt;
-    unsigned int count;
-    unsigned int socket_bufsiz;
-    unsigned int socket_count;
-    struct PerlZMQ_Socket_t **sockets;
-} PerlZMQ_Context;
+    void         *ctxt;
+    unsigned int thrdcnt;
+} PerlZMQ_Raw_Context;
+#endif
 
-typedef struct PerlZMQ_Socket_t {
-    void *socket;
-    PerlZMQ_Context *ctxt;
-} PerlZMQ_Socket;
-
-typedef zmq_msg_t PerlZMQ_Message;
+typedef void      PerlZMQ_Raw_Socket;
+typedef zmq_msg_t PerlZMQ_Raw_Message;
 
 typedef struct {
     int bucket_size;

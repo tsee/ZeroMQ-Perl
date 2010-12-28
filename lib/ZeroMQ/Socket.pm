@@ -1,3 +1,101 @@
+package ZeroMQ::Socket;
+use strict;
+use Carp();
+use ZeroMQ ();
+
+BEGIN {
+    my @map = qw(
+        setsockopt
+        getsockopt
+        bind
+        connect
+        close
+    );
+    foreach my $method (@map) {
+        my $code = sprintf <<EOSUB, $method, $method;
+            sub $method {
+                my \$self = shift;
+                ZeroMQ::Raw::zmq_$method( \$self->socket, \@_ );
+            }
+EOSUB
+        eval $code;
+        die if $@;
+    }
+}
+
+sub new {
+    my ($class, $ctxt, @args) = @_;
+
+    if ( eval { $ctxt->isa( 'ZeroMQ::Context' ) } ) {
+        $ctxt = $ctxt->ctxt;
+    }
+
+    bless {
+        _socket => ZeroMQ::Raw::zmq_socket( $ctxt, @args ),
+    }, $class;
+}
+
+sub socket {
+    $_[0]->{_socket};
+}
+
+sub recv {
+    my ($self, $flags) = @_;
+
+    $flags ||= 0;
+    my $rawmsg = ZeroMQ::Raw::zmq_recv( $self->socket, $flags );
+    return $rawmsg ?
+        ZeroMQ::Message->new_from_message( $rawmsg ) :
+        ()
+    ;
+}
+
+sub send {
+    my ($self, $msg, $flags) = @_;
+
+    if (eval { $msg->isa( 'ZeroMQ::Message' ) } ) {
+        $msg = $msg->message;
+    }
+
+    $flags ||= 0;
+
+    ZeroMQ::Raw::zmq_send( $self->socket, $msg, $flags );
+}
+
+sub recv_as {
+    my ($self, $type) = @_;
+
+    my $deserializer = ZeroMQ->_get_deserializer( $type );
+    if (! $deserializer ) {
+        Carp::croak("No deserializer $type found");
+    }
+
+    my $msg = $self->recv();
+    $deserializer->( $msg->data );
+}
+
+sub send_as {
+    my ($self, $type, $data) = @_;
+
+    my $serializer = ZeroMQ->_get_serializer( $type );
+    if (! $serializer ) {
+        Carp::croak("No serializer $type found");
+    }
+
+    $self->send( $serializer->( $data ) );
+}
+
+sub DESTROY {
+    my $self = shift;
+    if ($self) {
+        $self->close;
+    }
+}
+
+1;
+
+__END__
+
 =head1 NAME
 
 ZeroMQ::Socket - A 0MQ Socket object
@@ -126,10 +224,14 @@ using C<bind($endpoint>)>. The exact semantics depend on the socket type.
 Connect to an existing endpoint. Takes an enpoint string as argument,
 see the documentation for C<bind($endpoint)> above.
 
+=head2 close
+
 =head2 send
 
 The C<send($msg, $flags)> method queues the given message to be sent to the
 socket. The flags argument is a combination of the flags defined below:
+
+=head2 send_as( $type, $message, $flags )
 
 =over 2
 
@@ -154,6 +256,8 @@ the socket and returns it as a new C<ZeroMQ::Message> object.
 If there are no messages available on the specified socket
 the C<recv()> method blocks until the request can be satisfied.
 The flags argument is a combination of the flags defined below:
+
+=head2 recv_as( $type, $flags )
 
 =over 2
 

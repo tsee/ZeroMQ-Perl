@@ -1,3 +1,36 @@
+package ZeroMQ::Message;
+use strict;
+
+sub new {
+    my ($class, $data) = @_;
+    bless {
+        _message => ZeroMQ::Raw::zmq_msg_init_data( $data )
+    }, $class;
+}
+
+sub new_from_message {
+    my ($class, $message) = @_;
+    bless {
+        _message => $message
+    }, $class;
+}
+
+sub message {
+    $_[0]->{_message};
+}
+
+sub data {
+    ZeroMQ::Raw::zmq_msg_data( $_[0]->message );
+}
+
+sub size {
+    ZeroMQ::Raw::zmq_msg_size( $_[0]->message );
+}
+
+1;
+
+__END__
+
 =head1 NAME
 
 ZeroMQ::Message - A 0MQ Message object
@@ -24,6 +57,16 @@ to be passed over a C<ZeroMQ::Socket>.
 Creates a new C<ZeroMQ::Message>.
 
 Takes the data to send with the message as argument.
+
+=head2 new_from_message( $rawmsg )
+
+Creates a new C<ZeroMQ::Message>.
+
+Takes a ZeroMQ::Raw::Message object as argument.
+
+=head2 message
+
+Return the underlying ZeroMQ::Raw::Message object.
 
 =head2 size
 
