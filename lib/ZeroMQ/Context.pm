@@ -21,11 +21,6 @@ sub socket {
     return ZeroMQ::Socket->new(@_); # $_[0] should contain the context
 }
 
-sub DESTROY {
-    my $self = shift;
-    $self->term();
-}
-
 sub term {
     my $self = shift;
     ZeroMQ::Raw::zmq_term($self->ctxt);

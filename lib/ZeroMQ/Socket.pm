@@ -85,13 +85,6 @@ sub send_as {
     $self->send( $serializer->( $data ) );
 }
 
-sub DESTROY {
-    my $self = shift;
-    if ($self) {
-        $self->close;
-    }
-}
-
 1;
 
 __END__
