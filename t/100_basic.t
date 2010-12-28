@@ -58,6 +58,7 @@ subtest 'basic inproc communication' => sub {
     is_deeply($robj, $obj);
 };
 
+
 subtest 'invalid bind' => sub {
     my $cxt = ZeroMQ::Context->new(0); # must be 0 theads for in-process bind
     my $sock = $cxt->socket(ZMQ_REP); # server like reply socket

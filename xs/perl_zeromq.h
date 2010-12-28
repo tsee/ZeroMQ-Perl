@@ -15,13 +15,12 @@ inline void PerlZQM_set_bang(pTHX_ int err);
 
 #ifndef USE_ITHREADS
 typedef void      PerlZMQ_Raw_Context;
-#else 
+#else
 typedef struct {
-    void         *ctxt;
-    unsigned int thrdcnt;
+    tTHX    interp;
+    void   *ctxt;
 } PerlZMQ_Raw_Context;
 #endif
-
 typedef void      PerlZMQ_Raw_Socket;
 typedef zmq_msg_t PerlZMQ_Raw_Message;
 

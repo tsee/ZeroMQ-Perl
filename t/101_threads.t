@@ -19,6 +19,7 @@ use ZeroMQ qw/:all/;
 
     my $main_socket = $cxt->socket(ZMQ_UPSTREAM);
     isa_ok($main_socket, "ZeroMQ::Socket");
+    $main_socket->close;
     my $t = threads->new(sub {
         note "created thread " . threads->tid;
         my $sock = $cxt->socket( ZMQ_UPSTREAM );
@@ -36,12 +37,13 @@ use ZeroMQ qw/:all/;
         $client->send( "Wee Woo" );
         my $data = $sock->recv();
         my $ok = is $data->data, "Wee Woo", "got same message";
-
-        $sock->close;
-        $client->close;
         return $ok;
     });
+
+    note "Now waiting for thread to join";
     my $ok = $t->join();
+
+    note "Thread joined";
     ok($ok, "socket and context not defined in subthread");
 }
 

@@ -45,7 +45,7 @@ static MGVTBL PerlZMQ_Raw_Message_vtbl = { /* for identity */
     NULL, /* clear */
     PerlZMQ_Raw_Message_free, /* free */
     NULL, /* copy */
-    NULL, /* PerlZMQ_Message_mg_dup, /* dup */
+    NULL, /* PerlZMQ_Message_mg_dup, dup */
 #ifdef MGf_LOCAL
     NULL,  /* local */
 #endif
@@ -54,25 +54,20 @@ static MGVTBL PerlZMQ_Raw_Message_vtbl = { /* for identity */
 static int
 PerlZMQ_Raw_Context_free( pTHX_ SV * const sv, MAGIC *const mg ) {
     PerlZMQ_Raw_Context* const ctxt = (PerlZMQ_Raw_Context *) mg->mg_ptr;
-#if (PERLZMQ_TRACE > 0)
-    warn("Context_free");
-#endif
     PERL_UNUSED_VAR(sv);
     if (ctxt != NULL) {
 #ifdef USE_ITHREADS
-        if ( --ctxt->thrdcnt == 0) {
-#if (PERLZMQ_TRACE > 0)
-warn("thrdcnt = %d, terminating!", ctxt->thrdcnt );
+        if ( ctxt->interp == aTHX ) { /* is where I came from */
+#if (PERLZMQ_TRACE > 0) 
+        warn("context free %p", aTHX);
+        warn("mg_obj -> %p", mg->mg_obj);
 #endif
             zmq_term( ctxt->ctxt );
-            Safefree( ctxt );
-        } else {
-#if (PERLZMQ_TRACE > 0)
-warn("thrdcnt = %d, not terminating", ctxt->thrdcnt );
-#endif
+            mg->mg_ptr = NULL;
         }
 #else
         zmq_term( ctxt );
+        mg->mg_ptr = NULL;
 #endif
     }
     return 1;
@@ -98,17 +93,8 @@ PerlZMQ_Raw_Context_mg_find(pTHX_ SV* const sv, const MGVTBL* const vtbl){
 
 static int
 PerlZMQ_Raw_Context_mg_dup(pTHX_ MAGIC* const mg, CLONE_PARAMS* const param){
-#ifdef USE_ITHREADS
-    PerlZMQ_Raw_Context *ctxt = (PerlZMQ_Raw_Context *) mg->mg_ptr;
-    ctxt->thrdcnt++;
-#if (PERLZMQ_TRACE >0)
-warn("duped. now thrdcnt is %d", ctxt->thrdcnt);
-#endif
-    PERL_UNUSED_VAR(param);
-#else
     PERL_UNUSED_VAR(mg);
     PERL_UNUSED_VAR(param);
-#endif
     return 0;
 }
 
@@ -129,14 +115,14 @@ static int
 PerlZMQ_Raw_Socket_free(pTHX_ SV* const sv, MAGIC* const mg)
 {
     PerlZMQ_Raw_Socket* const sock = (PerlZMQ_Raw_Socket *) mg->mg_ptr;
+    PERL_UNUSED_VAR(sv);
+    if (sock) {
 #if (PERLZMQ_TRACE > 0)
     warn("Socket_free");
 #endif
-    PERL_UNUSED_VAR(sv);
-    if (sock) {
-        return zmq_close( sock );
+        zmq_close( sock );
     }
-    return -1;
+    return 1;
 }
 
 static int
@@ -228,8 +214,11 @@ PerlZMQ_Raw_zmq_init( nthreads )
     CODE:
 #ifdef USE_ITHREADS
         Newxz( RETVAL, 1, PerlZMQ_Raw_Context );
-        RETVAL->thrdcnt = 1;
-        RETVAL->ctxt = zmq_init( nthreads );
+        RETVAL->interp = aTHX;
+        RETVAL->ctxt   = zmq_init( nthreads );
+#if (PERLZMQ_TRACE > 0)
+        warn("context create %p", aTHX);
+#endif
 #else
         RETVAL = zmq_init( nthreads );
 #endif
