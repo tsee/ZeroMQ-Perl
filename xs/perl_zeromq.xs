@@ -202,7 +202,6 @@ MODULE = ZeroMQ    PACKAGE = ZeroMQ::Constants
 
 INCLUDE: const-xs.inc
 
-
 MODULE = ZeroMQ    PACKAGE = ZeroMQ::Raw  PREFIX = PerlZMQ_Raw_
 
 PROTOTYPES: DISABLED
