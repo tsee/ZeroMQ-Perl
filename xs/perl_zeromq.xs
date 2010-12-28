@@ -17,6 +17,7 @@ PerlZMQ_Raw_Message_free( pTHX_ SV * const sv, MAGIC *const mg ) {
     PERL_UNUSED_VAR(sv);
     assert( msg != NULL );
     zmq_msg_close( msg );
+    Safefree( msg );
 }
 
 static MAGIC*
