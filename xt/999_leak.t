@@ -2,7 +2,7 @@ use strict;
 use Test::More;
 BEGIN {
     if (! $ENV{TEST_LEAK}) {
-        plan skip_all "Set TEST_LEAK to run leak tests";
+        plan skip_all => "Set TEST_LEAK to run leak tests";
     }
 }
 
