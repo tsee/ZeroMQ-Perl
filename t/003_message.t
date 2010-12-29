@@ -8,6 +8,8 @@ BEGIN {
         zmq_msg_init_size
         zmq_msg_data
         zmq_msg_size
+        zmq_msg_copy
+        zmq_msg_move
     );
 }
 
@@ -40,7 +42,16 @@ subtest "sane allocation / cleanup for message (init_size)" => sub {
     } "code lives";
 };
 
-# Should probably run this test under valgrind to make sure
-# we're not leaking memory
+subtest "copy / move" => sub {
+    lives_ok {
+        my $msg1 = zmq_msg_init_data( "foobar" );
+        my $msg2 = zmq_msg_init_data( "fogbaz" );
+        my $msg3 = zmq_msg_init_data( "figbun" );
+
+        is zmq_msg_copy( $msg1, $msg2 ), 0, "copy returns 0";
+        is zmq_msg_data( $msg1 ), zmq_msg_data( $msg2 ), "msg1 == msg2";
+        is zmq_msg_data( $msg1 ), "fogbaz", "... and msg2's data is in msg1";
+    } "code lives";
+};
 
 done_testing;

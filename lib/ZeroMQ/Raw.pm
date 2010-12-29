@@ -20,6 +20,8 @@ our @EXPORT = qw(
     zmq_msg_init_data
     zmq_msg_init_size
     zmq_msg_size
+    zmq_msg_copy
+    zmq_msg_move
 
     zmq_bind
     zmq_close

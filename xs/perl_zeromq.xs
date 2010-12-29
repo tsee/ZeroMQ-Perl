@@ -308,6 +308,24 @@ PerlZMQ_Raw_zmq_msg_close(message)
     OUTPUT:
         RETVAL
 
+int
+PerlZMQ_Raw_zmq_msg_move(dest, src)
+        PerlZMQ_Raw_Message *dest;
+        PerlZMQ_Raw_Message *src;
+    CODE:
+        RETVAL = zmq_msg_move( dest, src );
+    OUTPUT:
+        RETVAL
+
+int
+PerlZMQ_Raw_zmq_msg_copy (dest, src);
+        PerlZMQ_Raw_Message *dest;
+        PerlZMQ_Raw_Message *src;
+    CODE:
+        RETVAL = zmq_msg_copy( dest, src );
+    OUTPUT:
+        RETVAL
+
 PerlZMQ_Raw_Socket *
 PerlZMQ_Raw_zmq_socket (ctxt, type)
         PerlZMQ_Raw_Context *ctxt;
