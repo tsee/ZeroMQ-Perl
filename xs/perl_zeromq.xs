@@ -8,7 +8,7 @@ inline void PerlZMQ_set_bang(pTHX_ int err) {
     sv_setsv(errsv, newSViv(err));
 }
 
-static void
+static int
 PerlZMQ_Raw_Message_free( pTHX_ SV * const sv, MAGIC *const mg ) {
     PerlZMQ_Raw_Message* const msg = (PerlZMQ_Raw_Message *) mg->mg_ptr;
 #if (PERLZMQ_TRACE > 0)
@@ -18,6 +18,7 @@ PerlZMQ_Raw_Message_free( pTHX_ SV * const sv, MAGIC *const mg ) {
     assert( msg != NULL );
     zmq_msg_close( msg );
     Safefree( msg );
+    return 1;
 }
 
 static MAGIC*
