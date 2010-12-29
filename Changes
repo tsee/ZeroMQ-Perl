@@ -1,5 +1,11 @@
 Changelog for Perl module ZeroMQ.
 
+0.02_04 Tue Dec 29 2010 16:20 JST
+  - Add zmq_msg_copy and zmq_msg_move
+  - Fix minor compile warning
+  - Make it so that ZeroMQ::Raw doesn't depend on ZeroMQ -- and other
+    modules that it in turn depends on. Now ZeroMQ::Raw can be used standalone
+
 0.02_03 Tue Dec 28 2010 21:40 JST
   - Rework the internals to allow high level API (perl-ish, OO) and
     low level API (straight portof zeromq C binding), thanks to jrockway
