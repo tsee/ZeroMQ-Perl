@@ -116,7 +116,7 @@ __END__
 
 =head1 NAME
 
-ZeroMQ::Constants
+ZeroMQ::Constants - ZeroMQ Constants
 
 =head1 EXPORTS
 
