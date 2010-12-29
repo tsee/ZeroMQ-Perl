@@ -4,10 +4,24 @@ eg/hello_server.pl
 eg/local_lat.pl
 eg/pubsub_client.pl
 eg/pubsub_server.pl
+eg/pushpull_client.pl
+eg/pushpull_server.pl
 eg/remote_lat.pl
 eg/thread_0mq.pl
 eg/threaded_client.pl
 eg/threaded_server.pl
+inc/Module/Install.pm
+inc/Module/Install/AuthorTests.pm
+inc/Module/Install/Base.pm
+inc/Module/Install/Can.pm
+inc/Module/Install/Fetch.pm
+inc/Module/Install/Makefile.pm
+inc/Module/Install/Metadata.pm
+inc/Module/Install/ReadmeFromPod.pm
+inc/Module/Install/TestTarget.pm
+inc/Module/Install/Win32.pm
+inc/Module/Install/WriteAll.pm
+inc/Module/Install/XSUtil.pm
 lib/ZeroMQ.pm
 lib/ZeroMQ/Constants.pm
 lib/ZeroMQ/Context.pm
@@ -15,7 +29,7 @@ lib/ZeroMQ/Message.pm
 lib/ZeroMQ/Raw.pm
 lib/ZeroMQ/Socket.pm
 Makefile.PL
-MANIFEST
+MANIFEST			This list of files
 MANIFEST.SKIP
 META.yml
 ppport.h
@@ -31,6 +45,7 @@ t/100_basic.t
 t/101_threads.t
 t/103_json.t
 t/104_ipc.t
+tools/genfiles.pl
 xs/const-xs.inc
 xs/perl_zeromq.h
 xs/perl_zeromq.xs

@@ -50,3 +50,7 @@
 ^MYMETA.yml$
 
 ^xs/perl_zeromq.c$
+^build\b
+^build.pl$
+^install\b
+^extlib\b
