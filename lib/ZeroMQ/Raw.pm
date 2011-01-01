@@ -59,6 +59,10 @@ ZeroMQ::Raw - Low-level API for ZeroMQ
 
 =head2 zmq_msg_size
 
+=head2 zmq_msg_move
+
+=head2 zmq_msg_copy
+
 =head2 zmq_bind
 
 =head2 zmq_close
