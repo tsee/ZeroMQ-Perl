@@ -9,6 +9,20 @@ inline void PerlZMQ_set_bang(pTHX_ int err) {
 }
 
 static int
+PerlZMQ_Raw_Message_mg_dup(pTHX_ MAGIC* const mg, CLONE_PARAMS* const param) {
+    PerlZMQ_Raw_Message *const src = (PerlZMQ_Raw_Message *) mg->mg_ptr;
+    PerlZMQ_Raw_Message *dest;
+
+    PERL_UNUSED_VAR( param );
+ 
+    Newxz( dest, 1, PerlZMQ_Raw_Message );
+    zmq_msg_init( dest );
+    zmq_msg_copy ( dest, src );
+    mg->mg_ptr = (char *) dest;
+    return 0;
+}
+
+static int
 PerlZMQ_Raw_Message_free( pTHX_ SV * const sv, MAGIC *const mg ) {
     PerlZMQ_Raw_Message* const msg = (PerlZMQ_Raw_Message *) mg->mg_ptr;
 #if (PERLZMQ_TRACE > 0)
@@ -47,7 +61,7 @@ static MGVTBL PerlZMQ_Raw_Message_vtbl = { /* for identity */
     NULL, /* clear */
     PerlZMQ_Raw_Message_free, /* free */
     NULL, /* copy */
-    NULL, /* PerlZMQ_Message_mg_dup, dup */
+    PerlZMQ_Raw_Message_mg_dup, /* dup */
 #ifdef MGf_LOCAL
     NULL,  /* local */
 #endif
