@@ -1,5 +1,9 @@
 Changelog for Perl module ZeroMQ.
 
+0.02_05 Tue Jan 03 2010 00:30 JST
+  - Add zmq_poll, with the ability to poll random file descriptors along with
+    zmq sockets (rt #62851)
+
 0.02_04 Tue Dec 29 2010 16:20 JST
   - Add zmq_msg_copy and zmq_msg_move
   - Fix minor compile warning

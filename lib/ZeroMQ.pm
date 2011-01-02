@@ -1,7 +1,7 @@
 package ZeroMQ;
 use strict;
 BEGIN {
-    our $VERSION = '0.02_04';
+    our $VERSION = '0.02_05';
     our @ISA = qw(Exporter);
 }
 use ZeroMQ::Raw ();
