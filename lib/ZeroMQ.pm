@@ -35,17 +35,6 @@ eval {
     register_write_type(json => \&JSON::encode_json);
 };
 
-package
-    ZeroMQ::PollItem::Guard;
-sub new { 
-    my $class = shift;
-    bless { @_ }, $class;
-}
-sub DESTROY {
-    my $self = shift;
-    $self->{pollitem}->remove( $self->{id} );
-}
-
 1;
 __END__
 
@@ -188,19 +177,32 @@ your application, use a name that's different from 'json'.
 
 =head1 ASYNCHRONOUS I/O WITH ZEROMQ
 
-By default ZeroMQ comes with its own poll() mechanism that can handle
-non-blocking sockets. You can use this by creating a ZeroMQ::PollItem
-object:
+By default ZeroMQ comes with its own zmq_poll() mechanism that can handle
+non-blocking sockets. You can use this by creating calling zmq_poll with a list
+of hashrefs:
 
-    my $pi = ZeroMQ::PollItem->new;
-    $pi->add( $zmq_socket, ZMQ_POLLIN, sub {
-        ....
-    } );
+    zmq_poll([
+        {
+            fd => fileno(STDOUT),
+            events => ZMQ_POLLOUT,
+            callback => \&callback,
+        },
+        {
+            socket => $zmq_socket,
+            events => ZMQ_POLLIN,
+            callback => \&callback
+        },
+    ], $timeout );
 
 Unfortunately this custom polling scheme doesn't play too well with AnyEvent.
-In the near future the zeromq library is believed to come with some API to 
-expose the file descriptor underneath the socket objects -- when that
-happens, we will be able to easily integrate it to AnyEvent. Stay tuned!
+As of zeromq2-2.1.0, you can use getsockopt to retrieve the underlying file
+descriptor, so use that to integrate ZeroMQ and AnyEvent:
+
+    my $fh = zmq_getsockopt( $socket, ZMQ_FD );
+    my $w; $w = AE::io $fh, 0, sub {
+        undef $w;
+        print $fh "Hello\n";
+    };
 
 =head1 NOTES ON MULTI-PROCESS and MULTI-THREADED USAGE
 

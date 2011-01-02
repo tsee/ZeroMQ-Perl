@@ -1,44 +1,46 @@
 use strict;
-use Test::More skip_all => "TODO";
+use Test::More;
 use Test::Exception;
+
 BEGIN {
-    use_ok "ZeroMQ", "ZMQ_REP", "ZMQ_REQ", "ZMQ_POLLIN", "ZMQ_POLLOUT", "ZMQ_NOBLOCK";
+    use_ok "ZeroMQ::Raw";
+    use_ok "ZeroMQ::Constants", ":all";
 }
 
-lives_ok {
-    my $ctxt = ZeroMQ::Context->new;
-    my $sock = $ctxt->socket( ZMQ_REP );
-    my $item = ZeroMQ::PollItem->new();
-    ok $item;
-    isa_ok $item, 'ZeroMQ::PollItem';
-    {
-        my $guard = $item->add( $sock, ZMQ_POLLIN, sub { ok "callback" } );
-        is($item->size, 1);
-    }
-    is($item->size, 0);
-} "PollItem doesn't die";
+subtest 'basic poll with fd' => sub {
+    lives_ok {
+        my $called = 0;
+        zmq_poll([
+            {
+                fd       => fileno(STDOUT),
+                events   => ZMQ_POLLOUT,
+                callback => sub { $called++ }
+            }
+        ], 1);
+        ok $called, "callback called";
+    } "PollItem doesn't die";
+};
 
-lives_ok {
-    my $ctxt = ZeroMQ::Context->new;
-    my $req = $ctxt->socket( ZMQ_REQ );
-    my $rep = $ctxt->socket( ZMQ_REP );
-    my $callback = 0;
-    
-    my $pi  = ZeroMQ::PollItem->new();
-    {
-        $rep->bind("inproc://polltest");
-        $req->connect("inproc://polltest");
-        $req->send("Test");
+subtest 'poll with zmq sockets' => sub {
+    my $ctxt = zmq_init();
+    my $req = zmq_socket( $ctxt, ZMQ_REQ );
+    my $rep = zmq_socket( $ctxt, ZMQ_REP );
+    my $called = 0;
+    lives_ok {
+        zmq_bind( $rep, "inproc://polltest");
+        zmq_connect( $req, "inproc://polltest");
+        zmq_send( $req, "Test");
 
-        my $guard; $guard = $pi->add( $rep, ZMQ_POLLIN, sub { 
-            $callback++;
-            undef $guard;
-        } );
+        zmq_poll([
+            {
+                socket   => $rep,
+                events   => ZMQ_POLLIN,
+                callback => sub { $called++ }
+            },
+        ], 1);
+    } "PollItem correctly handles callback";
 
-        $pi->poll(0);
-    }
-
-    is $callback, 1;
-} "PollItem correctly handles callback";
+    is $called, 1;
+};
 
 done_testing;
