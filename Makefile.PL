@@ -79,7 +79,7 @@ if ($ENV{LIBS}) {
 }
 cc_src_paths 'xs';
 cc_assert_lib 'zmq';
-cc_libs 'zmq';
+cc_libs 'zmq', 'uuid'; # uuid for cygwin, but can't hurt
 
 default_test_target 
     env => {
