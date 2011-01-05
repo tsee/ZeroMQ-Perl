@@ -3,6 +3,73 @@ use File::Spec;
 
 write_constants_file( File::Spec->catfile('xs', 'const-xs.inc') );
 write_typemap( File::Spec->catfile('xs', 'typemap') );
+write_magic_file( File::Spec->catfile('xs', 'mg-xs.inc') );
+
+sub write_magic_file {
+    my $file = shift;
+
+    open my $fh, '>', $file or
+        die "Could not open objects file $file: $!";
+
+    print $fh <<EOM;
+STATIC_INLINE
+int
+PerlZMQ_mg_free(pTHX_ SV * const sv, MAGIC *const mg ) {
+    PERL_UNUSED_VAR(sv);
+    Safefree(mg->mg_ptr);
+    return 0;
+}
+
+STATIC_INLINE
+int
+PerlZMQ_mg_dup(pTHX_ MAGIC* const mg, CLONE_PARAMS* const param) {
+    PERL_UNUSED_VAR(mg);
+    PERL_UNUSED_VAR(param);
+    return 0;
+}
+
+EOM
+    open my $src, '<', "xs/perl_zeromq.xs";
+    my @perl_types = qw(
+        ZeroMQ::Raw::Context
+        ZeroMQ::Raw::Socket
+        ZeroMQ::Raw::Message
+        ZeroMQ::Raw::PollItem
+    );
+    foreach my $perl_type (@perl_types) {
+        my $c_type = $perl_type;
+        $c_type =~ s/::/_/g;
+        $c_type =~ s/^ZeroMQ/PerlZMQ/;
+        my $vtablename = sprintf '%s_vtbl', $c_type;
+
+        # check if we have a function named ${c_type}_free and ${c_type}_mg_dup
+        my ($has_free, $has_dup);
+        seek ($src, 0, 0);
+        while (<$src>) {
+            $has_free++ if /^${c_type}_mg_free\b/;
+            $has_dup++ if /^${c_type}_mg_dup\b/;
+        }
+
+        my $free = $has_free ? "${c_type}_mg_free" : "PerlZMQ_mg_free";
+        my $dup  = $has_dup  ? "${c_type}_mg_dup"  : "PerlZMQ_mg_dup";
+        print $fh <<EOM
+static MGVTBL $vtablename = { /* for identity */
+    NULL, /* get */
+    NULL, /* set */
+    NULL, /* len */
+    NULL, /* clear */
+    $free, /* free */
+    NULL, /* copy */
+    $dup, /* dup */
+#ifdef MGf_LOCAL
+    NULL,  /* local */
+#endif
+};
+
+EOM
+    }
+
+}
 
 sub write_constants_file {
     my $file = shift;

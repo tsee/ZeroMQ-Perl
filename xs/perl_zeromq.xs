@@ -23,7 +23,7 @@ PerlZMQ_Raw_Message_mg_dup(pTHX_ MAGIC* const mg, CLONE_PARAMS* const param) {
 }
 
 static int
-PerlZMQ_Raw_Message_free( pTHX_ SV * const sv, MAGIC *const mg ) {
+PerlZMQ_Raw_Message_mg_free( pTHX_ SV * const sv, MAGIC *const mg ) {
     PerlZMQ_Raw_Message* const msg = (PerlZMQ_Raw_Message *) mg->mg_ptr;
 #if (PERLZMQ_TRACE > 0)
     warn("Message_free");
@@ -53,22 +53,8 @@ PerlZMQ_Raw_Message_mg_find(pTHX_ SV* const sv, const MGVTBL* const vtbl){
     return NULL; /* not reached */
 }
 
-
-static MGVTBL PerlZMQ_Raw_Message_vtbl = { /* for identity */
-    NULL, /* get */
-    NULL, /* set */
-    NULL, /* len */
-    NULL, /* clear */
-    PerlZMQ_Raw_Message_free, /* free */
-    NULL, /* copy */
-    PerlZMQ_Raw_Message_mg_dup, /* dup */
-#ifdef MGf_LOCAL
-    NULL,  /* local */
-#endif
-};
-
 static int
-PerlZMQ_Raw_Context_free( pTHX_ SV * const sv, MAGIC *const mg ) {
+PerlZMQ_Raw_Context_mg_free( pTHX_ SV * const sv, MAGIC *const mg ) {
     PerlZMQ_Raw_Context* const ctxt = (PerlZMQ_Raw_Context *) mg->mg_ptr;
     PERL_UNUSED_VAR(sv);
     if (ctxt != NULL) {
@@ -114,21 +100,8 @@ PerlZMQ_Raw_Context_mg_dup(pTHX_ MAGIC* const mg, CLONE_PARAMS* const param){
     return 0;
 }
 
-static MGVTBL PerlZMQ_Raw_Context_vtbl = { /* for identity */
-    NULL, /* et */
-    NULL, /* set */
-    NULL, /* len */
-    NULL, /* clear */
-    PerlZMQ_Raw_Context_free, /* free */
-    NULL, /* copy */
-    PerlZMQ_Raw_Context_mg_dup, /* dup */
-#ifdef MGf_LOCAL
-    NULL,  /* local */
-#endif
-};
-
 static int
-PerlZMQ_Raw_Socket_free(pTHX_ SV* const sv, MAGIC* const mg)
+PerlZMQ_Raw_Socket_mg_free(pTHX_ SV* const sv, MAGIC* const mg)
 {
     PerlZMQ_Raw_Socket* const sock = (PerlZMQ_Raw_Socket *) mg->mg_ptr;
     PERL_UNUSED_VAR(sv);
@@ -171,20 +144,7 @@ PerlZMQ_Raw_Socket_mg_find(pTHX_ SV* const sv, const MGVTBL* const vtbl){
     return NULL; /* not reached */
 }
 
-
-static MGVTBL PerlZMQ_Raw_Socket_vtbl = { /* for identity */
-    NULL, /* get */
-    NULL, /* set */
-    NULL, /* len */
-    NULL, /* clear */
-    PerlZMQ_Raw_Socket_free, /* free */
-    NULL, /* copy */
-    PerlZMQ_Raw_Socket_mg_dup, /* dup */
-#ifdef MGf_LOCAL
-    NULL,  /* local */
-#endif
-};
-
+#include "mg-xs.inc"
 
 MODULE = ZeroMQ    PACKAGE = ZeroMQ   PREFIX = PerlZMQ_
 
