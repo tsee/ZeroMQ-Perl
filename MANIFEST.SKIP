@@ -54,3 +54,4 @@
 ^build.pl$
 ^install\b
 ^extlib\b
+^autobuild

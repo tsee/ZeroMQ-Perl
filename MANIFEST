@@ -1,6 +1,3 @@
-autobuild/cpanm
-autobuild/extlib/lib/local/lib.pm
-autobuild/run.sh
 Changes
 eg/hello_client.pl
 eg/hello_server.pl

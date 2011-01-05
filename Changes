@@ -1,6 +1,13 @@
 Changelog for Perl module ZeroMQ.
 
-0.02_05 Tue Jan 03 2010 00:30 JST
+0.04 Wed Jan 05 2011 18:20 JST
+  - Grr, remove autobuild stuff from MANIFEST, repackage.
+  - Code is identical to 0.03
+
+0.03 Wed Jan 05 2011 15:00 JST
+  - Ad docs, and upload 0.03
+
+0.02_05 Tue Jan 03 2011 00:30 JST
   - Add zmq_poll, with the ability to poll random file descriptors along with
     zmq sockets (rt #62851)
 
