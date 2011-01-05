@@ -54,8 +54,28 @@ DESCRIPTION
     Perl. It's a thin wrapper around the C API. Please read
     <http://zeromq.org> for more details on ZeroMQ.
 
-    Loading "ZeroMQ" will make the ZeroMQ::Context, ZeroMQ::Socket, and
-    ZeroMQ::Message classes available as well.
+CLASS WALKTHROUGH
+    ZeroMQ::Raw
+        Use ZeroMQ::Raw to get access to the C API such as "zmq_init",
+        "zmq_socket", et al. Functions provided in this low level API should
+        follow the C API exactly.
+
+    ZeroMQ::Constants
+        ZeroMQ::Constants contains all of the constants that are known to be
+        extractable from zmq.h. Do note that sometimes the list changes due
+        to additions/deprecations in the underlying zeromq2 library. We try
+        to do our best to make things available (at least to warn you that
+        some symbols are deprecated), but it may not always be possible.
+
+    ZeroMQ::Context
+    ZeroMQ::Socket
+    ZeroMQ::Message
+        ZeroMQ::Context, ZeroMQ::Socket, ZeroMQ::Message contain the
+        high-level, more perl-ish interface to the zeromq functionalities.
+
+    ZeroMQ
+        Loading "ZeroMQ" will make the ZeroMQ::Context, ZeroMQ::Socket, and
+        ZeroMQ::Message classes available as well.
 
 BASIC USAGE
     To start using ZeroMQ, you need to create a context object, then as many

@@ -1,3 +1,6 @@
+autobuild/cpanm
+autobuild/extlib/lib/local/lib.pm
+autobuild/run.sh
 Changes
 eg/hello_client.pl
 eg/hello_server.pl
@@ -45,8 +48,10 @@ t/100_basic.t
 t/101_threads.t
 t/103_json.t
 t/104_ipc.t
+tools/check_mi_mods.pl
 tools/genfiles.pl
 xs/const-xs.inc
+xs/mg-xs.inc
 xs/perl_zeromq.h
 xs/perl_zeromq.xs
 xs/typemap
