@@ -123,6 +123,8 @@ L<ZeroMQ::Context>, L<ZeroMQ::Socket>, L<ZeroMQ::Message> contain the high-level
 Loading C<ZeroMQ> will make the L<ZeroMQ::Context>, L<ZeroMQ::Socket>, and 
 L<ZeroMQ::Message> classes available as well.
 
+=back
+
 =head1 BASIC USAGE
 
 To start using ZeroMQ, you need to create a context object, then as many ZeroMQ::Socket as you need:
