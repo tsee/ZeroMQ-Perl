@@ -98,6 +98,28 @@ The C<ZeroMQ> module is a wrapper of the 0MQ message passing library for Perl.
 It's a thin wrapper around the C API. Please read L<http://zeromq.org> for
 more details on ZeroMQ.
 
+=head1 CLASS WALKTHROUGH
+
+=over 4
+
+=item ZeroMQ::Raw
+
+Use L<ZeroMQ::Raw> to get access to the C API such as C<zmq_init>, C<zmq_socket>, et al. Functions provided in this low level API should follow the C API exactly.
+
+=item ZeroMQ::Constants
+
+L<ZeroMQ::Constants> contains all of the constants that are known to be extractable from zmq.h. Do note that sometimes the list changes due to additions/deprecations in the underlying zeromq2 library. We try to do our best to make things available (at least to warn you that some symbols are deprecated), but it may not always be possible.
+
+=item ZeroMQ::Context
+
+=item ZeroMQ::Socket
+
+=item ZeroMQ::Message
+
+L<ZeroMQ::Context>, L<ZeroMQ::Socket>, L<ZeroMQ::Message> contain the high-level, more perl-ish interface to the zeromq functionalities.
+
+=item ZeroMQ
+
 Loading C<ZeroMQ> will make the L<ZeroMQ::Context>, L<ZeroMQ::Socket>, and 
 L<ZeroMQ::Message> classes available as well.
 
