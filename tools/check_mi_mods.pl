@@ -40,6 +40,7 @@ the tests:
 * Test::Exception (at least 0.29)
 * Test::Requires
 * Test::TCP
+* Devel::CheckLib
 
 EOM
     exit 0;
