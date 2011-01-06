@@ -49,9 +49,13 @@
 
 ^MYMETA.yml$
 
+^xs/mg-xs.inc$
+^xs/const-xs.inc$
+^xs/typemap$
 ^xs/perl_zeromq.c$
 ^build\b
 ^build.pl$
 ^install\b
 ^extlib\b
 ^autobuild
+
