@@ -17,7 +17,11 @@ inline void PerlZQM_set_bang(pTHX_ int err);
 typedef void      PerlZMQ_Raw_Context;
 #else
 typedef struct {
+#ifdef tTHX /* tTHX doesn't exist in older perls */
     tTHX    interp;
+#else
+    PerlInterpreter *interp;
+#endif
     void   *ctxt;
 } PerlZMQ_Raw_Context;
 #endif
