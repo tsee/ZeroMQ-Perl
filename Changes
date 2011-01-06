@@ -1,5 +1,11 @@
 Changelog for Perl module ZeroMQ.
 
+0.05 Thu Jan 06 2011 19:20 JST
+  - Various issues (rt #64520) reported by Jason Ball
+    * Make sure to generate const-xs.inc and the like when installing
+    * Tweak to work with perls older than 5.10
+    * Only generate README for authors
+
 0.04 Wed Jan 05 2011 18:20 JST
   - Grr, remove autobuild stuff from MANIFEST, repackage.
   - Code is identical to 0.03
