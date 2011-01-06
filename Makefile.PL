@@ -14,6 +14,9 @@ name 'ZeroMQ';
     abstract_from $mainpm;
     author 'Daisuke Maki <daisuke@endeworks.jp>';
     author 'Steffen Mueller <smueller@cpan.org>';
+    if ($Module::Install::AUTHOR) {
+        readme_from $mainpm;
+    }
 }
 
 test_requires 'Test::TCP';
