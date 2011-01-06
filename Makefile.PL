@@ -41,8 +41,6 @@ default_test_target
     }
 ;
 author_tests 'xt';
-WriteAll;
 
-if ($Module::Install::AUTHOR) {
-    do 'tools/genfiles.pl';
-}
+do 'tools/genfiles.pl';
+WriteAll;
