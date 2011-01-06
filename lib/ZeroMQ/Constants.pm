@@ -1,6 +1,6 @@
 package ZeroMQ::Constants;
 use strict;
-use parent qw(Exporter);
+use base qw(Exporter);
 use ZeroMQ ();
 
 # TODO: keep in sync with docs below and Makefile.PL
