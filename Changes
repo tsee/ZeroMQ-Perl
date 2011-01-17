@@ -1,5 +1,9 @@
 Changelog for Perl module ZeroMQ.
 
+0.07 Tue Jan 18 2011 07:50 JST
+  - Somehow zmq_device() was missing through 0.03 to 0.06. Re-added
+    as ZeroMQ::Raw::zmq_device()
+
 0.06 Tue Jan 18 2011 07:20 JST
   - Fix critical message corruption bug introduced by wrong usage of
     zmq_msg_init_data() (rt #64836). Reported, diagnosed by Jason Ball
