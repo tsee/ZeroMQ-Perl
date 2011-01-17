@@ -33,6 +33,8 @@ our @EXPORT = qw(
     zmq_socket
 
     zmq_poll
+
+    zmq_device
 );
 
 1;
@@ -105,5 +107,7 @@ A bitmask of ZMQ_POLLIN, ZMQ_POLLOUT, ZMQ_POLLERR
 Callback that gets invoked. Takes no arguments.
 
 =back
+
+=head2 zmq_device( device, insocket, outsocket )
 
 =cut

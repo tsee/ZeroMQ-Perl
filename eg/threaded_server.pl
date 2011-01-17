@@ -1,11 +1,12 @@
 #!/usr/bin/env perl
 use strict;
 use threads;
-use ZeroMQ qw(ZMQ_XREQ ZMQ_XREP ZMQ_REQ ZMQ_REP ZMQ_QUEUE);
+use ZeroMQ::Constants qw(ZMQ_XREQ ZMQ_XREP ZMQ_REQ ZMQ_REP ZMQ_QUEUE);
+use ZeroMQ::Raw;
 
-my $ctxt = ZeroMQ::Context->new();
-my $clients = $ctxt->socket(ZMQ_XREP);
-my $workers = $ctxt->socket(ZMQ_XREQ);
+my $ctxt = zmq_init();
+my $clients = zmq_socket($ctxt, ZMQ_XREP);
+my $workers = zmq_socket($ctxt, ZMQ_XREQ);
 
 my ($host, $port);
 
@@ -23,24 +24,24 @@ $port ||= 5566;
 
 print "Connecting to server...\n";
 
-$clients->bind( "tcp://$host:$port" );
-$workers->bind( "inproc://workers" );
+zmq_bind( $clients, "tcp://$host:$port" );
+zmq_bind( $workers, "inproc://workers" );
 
 for (1..5) {
     threads->create( sub {
         my $ctxt = shift;
-        my $wsock = $ctxt->socket(ZMQ_REP);
+        my $wsock = zmq_socket($ctxt, ZMQ_REP);
 
-        $wsock->connect( "inproc://workers" );
+        zmq_connect( $wsock, "inproc://workers" );
 
         while (1) {
-            my $message = $wsock->recv;
-            print $message->data, "\n";
+            my $message = zmq_recv( $wsock );
+            print zmq_msg_data($message), "\n";
             sleep 1; # Do some dummy "work"
 
-            $wsock->send( "World" );
+            zmq_send( $wsock, "World" );
         }
     }, $ctxt );
 }
 
-ZeroMQ::device(ZMQ_QUEUE, $clients, $workers);
+ZeroMQ::Raw::zmq_device(ZMQ_QUEUE, $clients, $workers);

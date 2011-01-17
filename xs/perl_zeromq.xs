@@ -635,3 +635,15 @@ PerlZMQ_Raw_zmq_poll( list, timeout = 0 )
         Safefree(callbacks);
     OUTPUT:
         RETVAL
+
+int
+PerlZMQ_Raw_zmq_device( device, insocket, outsocket )
+        int device;
+        PerlZMQ_Raw_Socket *insocket;
+        PerlZMQ_Raw_Socket *outsocket;
+    CODE:
+        RETVAL = zmq_device( device, insocket, outsocket );
+    OUTPUT:
+        RETVAL
+
+
