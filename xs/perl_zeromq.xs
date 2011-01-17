@@ -144,6 +144,12 @@ PerlZMQ_Raw_Socket_mg_find(pTHX_ SV* const sv, const MGVTBL* const vtbl){
     return NULL; /* not reached */
 }
 
+static void 
+PerlZMQ_free_string(void *data, void *hint) {
+    PERL_UNUSED_VAR(hint);
+    Safefree( (char *) data );
+}
+
 #include "mg-xs.inc"
 
 MODULE = ZeroMQ    PACKAGE = ZeroMQ   PREFIX = PerlZMQ_
@@ -256,7 +262,7 @@ PerlZMQ_Raw_zmq_msg_init_data( data, size = -1)
         Newxz( RETVAL, 1, PerlZMQ_Raw_Message );
         Newxz( x_data, x_data_len, char );
         Copy( sv_data, x_data, x_data_len, char );
-        zmq_msg_init_data(RETVAL, x_data, x_data_len, NULL, NULL);
+        zmq_msg_init_data(RETVAL, x_data, x_data_len, PerlZMQ_free_string, NULL);
     OUTPUT:
         RETVAL
 
