@@ -57,3 +57,5 @@ xt/103_eg_xreqxrep.t
 xt/999_leak.t
 xt/999_pod-coverage.t
 xt/999_pod.t
+xt/rt64836.t
+xt/rt64836_lowlevel.t

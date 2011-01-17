@@ -1,5 +1,9 @@
 Changelog for Perl module ZeroMQ.
 
+0.06 Tue Jan 18 2011 07:20 JST
+  - Fix critical message corruption bug introduced by wrong usage of
+    zmq_msg_init_data() (rt #64836). Reported, diagnosed by Jason Ball
+
 0.05 Thu Jan 06 2011 19:20 JST
   - Various issues (rt #64520) reported by Jason Ball
     * Make sure to generate const-xs.inc and the like when installing
