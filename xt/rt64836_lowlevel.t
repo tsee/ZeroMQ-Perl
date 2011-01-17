@@ -8,26 +8,27 @@ BEGIN {
     use_ok "ZeroMQ::Constants", ":all";
 }
 
-
-my $port = empty_port();
+my $max = $ENV{ MSGCOUNT } || 100;
+note "Using $max messages to test - set MSGCOUNT to a different number if you want to change this";
 
 test_tcp(
     client => sub {
         my $port = shift;
         my $ctxt = zmq_init();
         my $sock = zmq_socket($ctxt, ZMQ_SUB);
+        note "Client connecting to port $port";
         zmq_connect($sock,"tcp://127.0.0.1:$port" );
         zmq_setsockopt($sock, ZMQ_SUBSCRIBE, '');
 
-        my $cnt = 0;
-
-        while($cnt<1000) {		# expect to receive numbers 1..1000...
-            my $rawmsg = undef;
-            $rawmsg = zmq_recv($sock);
-            my $msg = zmq_msg_data($rawmsg);
-            is($msg, $cnt++, "Error -- messages not received in sequence or corrupt");
+        note "Starting to receive data";
+        for my $cnt ( 0 .. ($max - 1) ) {
+            my $rawmsg = zmq_recv($sock);
+            my $data = zmq_msg_data($rawmsg);
+            is($data, $cnt, "Expected $cnt, got $data");
         } 
-        note "OK";
+        my $msg = zmq_recv( $sock );
+        is( zmq_msg_data($msg), "end", "Done!" );
+        note "Received all messages";
     },
     server => sub {
         my $port = shift;
@@ -40,13 +41,13 @@ test_tcp(
         sleep 2;
 
         note "Server sending ordered data... (numbers 1..1000)";
-        for (my $c = 0; $c < 1000; $c++) {
+        for my $c ( 0 .. ( $max - 1 ) ) {
         	my $msg = zmq_msg_init_data($c);
-            note zmq_msg_data( $msg );
-            zmq_send($sock, $msg);
-        	zmq_msg_close($msg);
+            zmq_send($sock, $msg, ZMQ_SNDMORE);
         }
-        note "OK";
+        zmq_send( $sock, "end" );
+        note "Sent all messages";
+        note "Server exiting...";
     }
 );
 
