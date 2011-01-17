@@ -38,6 +38,8 @@ our %EXPORT_TAGS = (
         ZMQ_REP
         ZMQ_XREQ
         ZMQ_XREP
+        ZMQ_XSUB
+        ZMQ_XPUB
         ZMQ_PULL
         ZMQ_PUSH
         ZMQ_UPSTREAM
@@ -101,6 +103,7 @@ our %EXPORT_TAGS = (
 $EXPORT_TAGS{all} = [ map { @$_ } values %EXPORT_TAGS ];
 our @EXPORT_OK = (
     qw(
+        ZMQ_RECOVERY_IVL_MSEC
         ZMQ_HAUSNUMERO
         ZMQ_VERSION
         ZMQ_VERSION_MAJOR
@@ -143,6 +146,10 @@ The exportable constants are:
 =item ZMQ_XREQ
 
 =item ZMQ_XREP
+
+=item ZMQ_XPUB
+
+=item ZMQ_XSUB
 
 =item ZMQ_PULL
 
@@ -242,6 +249,11 @@ The exportable constants are:
 
 =item ZMQ_VERSION_PATCH
 
+=item ZMQ_RECOVERY_IVL_MSEC
+
 =back
 
+=head2 uncategorized
+
 =cut
+
