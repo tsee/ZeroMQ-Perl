@@ -13,6 +13,9 @@ PerlZMQ_Raw_Message_mg_dup(pTHX_ MAGIC* const mg, CLONE_PARAMS* const param) {
     PerlZMQ_Raw_Message *const src = (PerlZMQ_Raw_Message *) mg->mg_ptr;
     PerlZMQ_Raw_Message *dest;
 
+#if (PERLZMQ_TRACE > 0)
+    warn("Message_dup");
+#endif
     PERL_UNUSED_VAR( param );
  
     Newxz( dest, 1, PerlZMQ_Raw_Message );
@@ -376,6 +379,9 @@ PerlZMQ_Raw_zmq_recv(socket, flags = 0)
         warn("zmq recv with flags %d", flags);
 #endif
         rv = zmq_recv(socket, RETVAL, flags);
+#if (PERLZMQ_TRACE > 0)
+        warn("zmq_recv returned with rv '%d'", rv);
+#endif
         if (rv != 0) {
             SET_BANG;
             Safefree(RETVAL);
