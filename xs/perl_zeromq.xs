@@ -29,12 +29,13 @@ static int
 PerlZMQ_Raw_Message_mg_free( pTHX_ SV * const sv, MAGIC *const mg ) {
     PerlZMQ_Raw_Message* const msg = (PerlZMQ_Raw_Message *) mg->mg_ptr;
 #if (PERLZMQ_TRACE > 0)
-    warn("Message_free");
+    warn("Message_free for %p", msg);
 #endif
     PERL_UNUSED_VAR(sv);
-    assert( msg != NULL );
-    zmq_msg_close( msg );
-    Safefree( msg );
+    if ( msg != NULL ) {
+        zmq_msg_close( msg );
+        Safefree( msg );
+    }
     return 1;
 }
 
@@ -64,14 +65,15 @@ PerlZMQ_Raw_Context_mg_free( pTHX_ SV * const sv, MAGIC *const mg ) {
 #ifdef USE_ITHREADS
         if ( ctxt->interp == aTHX ) { /* is where I came from */
 #if (PERLZMQ_TRACE > 0) 
-        warn("context free %p", aTHX);
-        warn("mg_obj -> %p", mg->mg_obj);
+        warn("Context_free for context wrapper %p with zmq context %p for thread %p", ctxt, ctxt->ctxt, aTHX);
 #endif
             zmq_term( ctxt->ctxt );
             mg->mg_ptr = NULL;
+            Safefree(ctxt);
         }
 #else
         zmq_term( ctxt );
+        Safefree(ctxt);
         mg->mg_ptr = NULL;
 #endif
     }
@@ -110,7 +112,7 @@ PerlZMQ_Raw_Socket_mg_free(pTHX_ SV* const sv, MAGIC* const mg)
     PERL_UNUSED_VAR(sv);
     if (sock) {
 #if (PERLZMQ_TRACE > 0)
-    warn("Socket_free");
+    warn("Socket_free %p", sock);
 #endif
         zmq_close( sock );
     }
@@ -201,7 +203,7 @@ PerlZMQ_Raw_zmq_init( nthreads = 5 )
         RETVAL->interp = aTHX;
         RETVAL->ctxt   = zmq_init( nthreads );
 #if (PERLZMQ_TRACE > 0)
-        warn("context create %p", aTHX);
+        warn("context create context wrapper %p with zmq context %p for thread %p", RETVAL, RETVAL->ctxt, aTHX);
 #endif
 #else
         RETVAL = zmq_init( nthreads );
@@ -266,6 +268,9 @@ PerlZMQ_Raw_zmq_msg_init_data( data, size = -1)
         Newxz( x_data, x_data_len, char );
         Copy( sv_data, x_data, x_data_len, char );
         zmq_msg_init_data(RETVAL, x_data, x_data_len, PerlZMQ_free_string, NULL);
+#if (PERLZMQ_TRACE > 0)
+        warn("zmq_msg_init_data created message %p", RETVAL);
+#endif
     OUTPUT:
         RETVAL
 
@@ -323,6 +328,9 @@ PerlZMQ_Raw_zmq_socket (ctxt, type)
         RETVAL = zmq_socket( ctxt->ctxt, type );
 #else
         RETVAL = zmq_socket( ctxt, type );
+#endif
+#if (PERLZMQ_TRACE > 0)
+        warn( "created socket %p", RETVAL );
 #endif
     OUTPUT:
         RETVAL
@@ -386,8 +394,10 @@ PerlZMQ_Raw_zmq_recv(socket, flags = 0)
             SET_BANG;
             Safefree(RETVAL);
             RETVAL = NULL;
-            XSRETURN(0);
         }
+#if (PERLZMQ_TRACE > 0)
+        warn("zmq_recv created message %p", RETVAL );
+#endif
     OUTPUT:
         RETVAL
 
