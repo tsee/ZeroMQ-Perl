@@ -62,7 +62,7 @@ static MGVTBL $vtablename = { /* for identity */
     NULL, /* copy */
     $dup, /* dup */
 #ifdef MGf_LOCAL
-    NULL,  /* local */
+    NULL  /* local */
 #endif
 };
 
