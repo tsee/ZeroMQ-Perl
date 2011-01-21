@@ -31,7 +31,7 @@ subtest 'basic inproc communication' => sub {
     ok !$@, "connect to inproc socket";
 
     ok(!defined($sock->recv(ZMQ_NOBLOCK)), "recv before sending anything should return nothing");
-    ok($client->send( ZeroMQ::Message->new("Talk to me") ));
+    ok($client->send( ZeroMQ::Message->new("Talk to me") ) == 0);
     
     ok(!$sock->getsockopt(ZMQ_RCVMORE), "no ZMQ_RCVMORE set");
     ok($sock->getsockopt(ZMQ_AFFINITY) == 0, "no ZMQ_AFFINITY");
@@ -49,7 +49,7 @@ subtest 'basic inproc communication' => sub {
         blah => 'blubb',
     };
     my $frozen = nfreeze($obj);
-    ok($client->send( ZeroMQ::Message->new($frozen) ));
+    ok($client->send( ZeroMQ::Message->new($frozen) ) == 0);
     $msg = $sock->recv();
     ok(defined $msg, "received defined msg");
     isa_ok($msg, 'ZeroMQ::Message');

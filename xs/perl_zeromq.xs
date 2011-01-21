@@ -34,7 +34,6 @@ PerlZMQ_Raw_Message_mg_free( pTHX_ SV * const sv, MAGIC *const mg ) {
     PERL_UNUSED_VAR(sv);
     if ( msg != NULL ) {
         zmq_msg_close( msg );
-        Safefree( msg );
     }
     return 1;
 }
@@ -255,11 +254,10 @@ PerlZMQ_Raw_zmq_msg_init_data( data, size = -1)
         IV size;
     PREINIT:
         SV *class_sv = sv_2mortal(newSVpvn( "ZeroMQ::Raw::Message", 20 ));
-        char *sv_data;
-        char *x_data;
         STRLEN x_data_len;
+        char *sv_data = SvPV(data, x_data_len);
+        char *x_data;
     CODE: 
-        sv_data = SvPV(data, x_data_len);
         if (size >= 0) {
             x_data_len = size;
         }
@@ -379,24 +377,27 @@ PerlZMQ_Raw_zmq_recv(socket, flags = 0)
     PREINIT:
         SV *class_sv = sv_2mortal(newSVpvn( "ZeroMQ::Raw::Message", 20 ));
         int rv;
+        zmq_msg_t msg;
     CODE:
-        Newxz(RETVAL, 1, PerlZMQ_Raw_Message);
-        zmq_msg_init(RETVAL);
+        RETVAL = NULL;
+        zmq_msg_init(&msg);
+        rv = zmq_recv(socket, &msg, flags);
 #if (PERLZMQ_TRACE > 0)
         warn("zmq recv with flags %d", flags);
-#endif
-        rv = zmq_recv(socket, RETVAL, flags);
-#if (PERLZMQ_TRACE > 0)
         warn("zmq_recv returned with rv '%d'", rv);
 #endif
         if (rv != 0) {
             SET_BANG;
-            Safefree(RETVAL);
-            RETVAL = NULL;
-        }
+            zmq_msg_close(&msg);
+        } else {
+            Newxz(RETVAL, 1, PerlZMQ_Raw_Message);
+            zmq_msg_init(RETVAL);
+            zmq_msg_copy( RETVAL, &msg );
+            zmq_msg_close(&msg);
 #if (PERLZMQ_TRACE > 0)
-        warn("zmq_recv created message %p", RETVAL );
+            warn("zmq_recv created message %p", RETVAL );
 #endif
+        }
     OUTPUT:
         RETVAL
 
@@ -406,7 +407,6 @@ PerlZMQ_Raw_zmq_send(socket, message, flags = 0)
         SV *message;
         int flags;
     PREINIT:
-        int allocated = 0;
         PerlZMQ_Raw_Message *msg = NULL;
     CODE:
         if (! SvOK(message))
@@ -417,20 +417,23 @@ PerlZMQ_Raw_zmq_send(socket, message, flags = 0)
             if (mg) {
                 msg = (PerlZMQ_Raw_Message *) mg->mg_ptr;
             }
+
+            if (msg == NULL) {
+                croak("Got invalid message object");
+            }
+            
+            RETVAL = zmq_send(socket, msg, flags);
         } else {
             STRLEN data_len;
+            char *x_data;
             char *data = SvPV(message, data_len);
-            Newxz(msg, 1, PerlZMQ_Raw_Message);
-            allocated = 1;
-            zmq_msg_init_size(msg, sizeof(char) * data_len);
-            Copy(data, zmq_msg_data(msg), data_len, void);
-        }
+            zmq_msg_t msg;
 
-        RETVAL = (zmq_send(socket, msg, flags) == 0);
-
-        if ( allocated ) {
-            zmq_msg_close( msg );
-            Safefree( msg );
+            Newxz(x_data, data_len, char);
+            Copy(data, x_data, data_len, char);
+            zmq_msg_init_data(&msg, x_data, data_len, PerlZMQ_free_string, NULL);
+            RETVAL = zmq_send(socket, &msg, flags);
+            zmq_msg_close( &msg ); 
         }
     OUTPUT:
         RETVAL
