@@ -73,7 +73,6 @@ PerlZMQ_Raw_Context_mg_free( pTHX_ SV * const sv, MAGIC *const mg ) {
         }
 #else
         zmq_term( ctxt );
-        Safefree(ctxt);
         mg->mg_ptr = NULL;
 #endif
     }
