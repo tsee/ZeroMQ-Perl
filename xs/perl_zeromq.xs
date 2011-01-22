@@ -7,7 +7,7 @@ inline void PerlZMQ_set_bang(pTHX_ int err) {
 #if (PERLZMQ_TRACE > 0)
     warn("Set ERRSV ($!) to %d", err);
 #endif
-    sv_setsv(errsv, sv_2mortal(newSViv(err)));
+    sv_setiv(errsv, err);
 }
 
 static int
