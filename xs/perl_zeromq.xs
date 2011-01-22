@@ -590,7 +590,7 @@ PerlZMQ_Raw_zmq_setsockopt(sock, option, value)
 int
 PerlZMQ_Raw_zmq_poll( list, timeout = 0 )
         AV *list;
-        int timeout;
+        long timeout;
     PREINIT:
         I32 list_len;
         zmq_pollitem_t *pollitems;
