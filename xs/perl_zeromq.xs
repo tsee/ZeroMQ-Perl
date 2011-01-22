@@ -3,9 +3,11 @@
 #include "xshelper.h"
 
 inline void PerlZMQ_set_bang(pTHX_ int err) {
-    SV *errsv;
-    errsv = get_sv("!", GV_ADD);
-    sv_setsv(errsv, newSViv(err));
+    SV *errsv = get_sv("!", GV_ADD);
+#if (PERLZMQ_TRACE > 0)
+    warn("Set ERRSV ($!) to %d", err);
+#endif
+    sv_setsv(errsv, sv_2mortal(newSViv(err)));
 }
 
 static int
@@ -29,7 +31,7 @@ static int
 PerlZMQ_Raw_Message_mg_free( pTHX_ SV * const sv, MAGIC *const mg ) {
     PerlZMQ_Raw_Message* const msg = (PerlZMQ_Raw_Message *) mg->mg_ptr;
 #if (PERLZMQ_TRACE > 0)
-    warn("Message_free for %p", msg);
+    warn("Message_mg_free for SV = %p, zmq_msg_t = %p", sv, msg);
 #endif
     PERL_UNUSED_VAR(sv);
     if ( msg != NULL ) {
@@ -71,6 +73,9 @@ PerlZMQ_Raw_Context_mg_free( pTHX_ SV * const sv, MAGIC *const mg ) {
             Safefree(ctxt);
         }
 #else
+#if (PERLZMQ_TRACE > 0) 
+        warn("Context_free for zmq context %p", ctxt);
+#endif
         zmq_term( ctxt );
         mg->mg_ptr = NULL;
 #endif
@@ -389,6 +394,9 @@ PerlZMQ_Raw_zmq_recv(socket, flags = 0)
         if (rv != 0) {
             SET_BANG;
             zmq_msg_close(&msg);
+#if (PERLZMQ_TRACE > 0)
+            warn("zmq_recv got bad status, closing temporary message");
+#endif
         } else {
             Newxz(RETVAL, 1, PerlZMQ_Raw_Message);
             zmq_msg_init(RETVAL);
