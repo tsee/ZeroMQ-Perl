@@ -89,8 +89,7 @@ subtest 'non-blocking recv (success)' => sub {
                     socket => $sock,
                     events => ZMQ_POLLIN,
                     callback => sub {
-                        my $msg = zmq_recv( $sock, ZMQ_RCVMORE);
-                        if ($msg) {
+                        while (my $msg = zmq_recv( $sock, ZMQ_RCVMORE)) {
                             is ( zmq_msg_data( $msg ), $recvd + 1 );
                             $recvd++;
                         }
