@@ -29,9 +29,10 @@ test_tcp(
 
         my $cv = AE::cv;
         my $w; $w = AE::io $fh, 0, sub {
-            undef $w;
-            my $msg = zmq_recv( $sock );
-            $cv->send( $msg );
+            if (my $msg = zmq_recv( $sock, ZMQ_RCVMORE )) {
+                undef $w;
+                $cv->send( $msg );
+            }
         };
 
         note "Waiting...";
