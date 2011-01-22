@@ -236,9 +236,15 @@ PerlZMQ_Raw_Message *
 PerlZMQ_Raw_zmq_msg_init()
     PREINIT:
         SV *class_sv = sv_2mortal(newSVpvn( "ZeroMQ::Raw::Message", 20 ));
+        int rc;
     CODE:
         Newxz( RETVAL, 1, PerlZMQ_Raw_Message );
-        zmq_msg_init( RETVAL );
+        rc = zmq_msg_init( RETVAL );
+        if ( rc != 0 ) {
+            SET_BANG;
+            zmq_msg_close( RETVAL );
+            RETVAL = NULL;
+        }
     OUTPUT:
         RETVAL
 
@@ -247,9 +253,15 @@ PerlZMQ_Raw_zmq_msg_init_size( size )
         IV size;
     PREINIT:
         SV *class_sv = sv_2mortal(newSVpvn( "ZeroMQ::Raw::Message", 20 ));
+        int rc;
     CODE: 
         Newxz( RETVAL, 1, PerlZMQ_Raw_Message );
-        zmq_msg_init_size(RETVAL, size);
+        rc = zmq_msg_init_size(RETVAL, size);
+        if ( rc != 0 ) {
+            SET_BANG;
+            zmq_msg_close( RETVAL );
+            RETVAL = NULL;
+        }
     OUTPUT:
         RETVAL
 
@@ -262,6 +274,7 @@ PerlZMQ_Raw_zmq_msg_init_data( data, size = -1)
         STRLEN x_data_len;
         char *sv_data = SvPV(data, x_data_len);
         char *x_data;
+        int rc;
     CODE: 
         if (size >= 0) {
             x_data_len = size;
@@ -269,9 +282,16 @@ PerlZMQ_Raw_zmq_msg_init_data( data, size = -1)
         Newxz( RETVAL, 1, PerlZMQ_Raw_Message );
         Newxz( x_data, x_data_len, char );
         Copy( sv_data, x_data, x_data_len, char );
-        zmq_msg_init_data(RETVAL, x_data, x_data_len, PerlZMQ_free_string, NULL);
+        rc = zmq_msg_init_data(RETVAL, x_data, x_data_len, PerlZMQ_free_string, NULL);
+        if ( rc != 0 ) {
+            SET_BANG;
+            zmq_msg_close( RETVAL );
+            RETVAL = NULL;
+        }
 #if (PERLZMQ_TRACE > 0)
-        warn("zmq_msg_init_data created message %p", RETVAL);
+        else {
+            warn("zmq_msg_init_data created message %p", RETVAL);
+        }
 #endif
     OUTPUT:
         RETVAL
