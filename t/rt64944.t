@@ -72,7 +72,7 @@ subtest 'non-blocking recv (fail)' => sub {
     );
 };
 
-# for non-blocking calls to really succeed, you need to use zmq_poll
+# Code excericising zmq_poll to do non-blocking recv()
 subtest 'non-blocking recv (success)' => sub {
     test_tcp(
         client => sub {
@@ -113,7 +113,7 @@ subtest 'non-blocking recv (success)' => sub {
     );
 };
     
-# for non-blocking calls to really succeed, you need to use zmq_poll
+# Code excercising AnyEvent + ZMQ_FD to do non-blocking recv
 if (eval { require AnyEvent } && ! $@) {
     AnyEvent->import; # want AE namespace
     subtest 'non-blocking recv with AnyEvent (success)' => sub {
