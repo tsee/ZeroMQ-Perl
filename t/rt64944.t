@@ -94,7 +94,7 @@ subtest 'non-blocking recv (success)' => sub {
                             $recvd++;
                         }
                     }
-                } ], 1000000 );
+                } ], 1000000 ); # timeout in microseconds, so this is 1 sec
             }
             is $recvd, 10, "got all messages";
         },
