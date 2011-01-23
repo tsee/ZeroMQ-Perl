@@ -32,7 +32,6 @@ Makefile.PL
 MANIFEST			This list of files
 MANIFEST.SKIP
 META.yml
-ppport.h
 README
 t/000_compile.t
 t/001_context.t
@@ -45,11 +44,11 @@ t/100_basic.t
 t/101_threads.t
 t/103_json.t
 t/104_ipc.t
+t/rt64944.t
 tools/check_mi_mods.pl
 tools/genfiles.pl
 xs/perl_zeromq.h
 xs/perl_zeromq.xs
-xshelper.h
 xt/100_eg_hello_world.t
 xt/101_eg_pubsub.t
 xt/102_eg_threaded.t
@@ -59,3 +58,4 @@ xt/999_pod-coverage.t
 xt/999_pod.t
 xt/rt64836.t
 xt/rt64836_lowlevel.t
+xt/rt64944.t
