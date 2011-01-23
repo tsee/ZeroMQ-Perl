@@ -2,7 +2,8 @@
 #include "perl_zeromq.h"
 #include "xshelper.h"
 
-inline void PerlZMQ_set_bang(pTHX_ int err) {
+STATIC_INLINE void
+PerlZMQ_set_bang(pTHX_ int err) {
     SV *errsv = get_sv("!", GV_ADD);
 #if (PERLZMQ_TRACE > 0)
     warn("Set ERRSV ($!) to %d", err);
@@ -10,7 +11,7 @@ inline void PerlZMQ_set_bang(pTHX_ int err) {
     sv_setiv(errsv, err);
 }
 
-static int
+STATIC_INLINE int
 PerlZMQ_Raw_Message_mg_dup(pTHX_ MAGIC* const mg, CLONE_PARAMS* const param) {
     PerlZMQ_Raw_Message *const src = (PerlZMQ_Raw_Message *) mg->mg_ptr;
     PerlZMQ_Raw_Message *dest;
@@ -27,7 +28,7 @@ PerlZMQ_Raw_Message_mg_dup(pTHX_ MAGIC* const mg, CLONE_PARAMS* const param) {
     return 0;
 }
 
-static int
+STATIC_INLINE int
 PerlZMQ_Raw_Message_mg_free( pTHX_ SV * const sv, MAGIC *const mg ) {
     PerlZMQ_Raw_Message* const msg = (PerlZMQ_Raw_Message *) mg->mg_ptr;
 #if (PERLZMQ_TRACE > 0)
@@ -40,7 +41,7 @@ PerlZMQ_Raw_Message_mg_free( pTHX_ SV * const sv, MAGIC *const mg ) {
     return 1;
 }
 
-static MAGIC*
+STATIC_INLINE MAGIC*
 PerlZMQ_Raw_Message_mg_find(pTHX_ SV* const sv, const MGVTBL* const vtbl){
     MAGIC* mg;
 
@@ -58,7 +59,7 @@ PerlZMQ_Raw_Message_mg_find(pTHX_ SV* const sv, const MGVTBL* const vtbl){
     return NULL; /* not reached */
 }
 
-static int
+STATIC_INLINE int
 PerlZMQ_Raw_Context_mg_free( pTHX_ SV * const sv, MAGIC *const mg ) {
     PerlZMQ_Raw_Context* const ctxt = (PerlZMQ_Raw_Context *) mg->mg_ptr;
     PERL_UNUSED_VAR(sv);
@@ -83,7 +84,7 @@ PerlZMQ_Raw_Context_mg_free( pTHX_ SV * const sv, MAGIC *const mg ) {
     return 1;
 }
 
-static MAGIC*
+STATIC_INLINE MAGIC*
 PerlZMQ_Raw_Context_mg_find(pTHX_ SV* const sv, const MGVTBL* const vtbl){
     MAGIC* mg;
 
@@ -101,14 +102,14 @@ PerlZMQ_Raw_Context_mg_find(pTHX_ SV* const sv, const MGVTBL* const vtbl){
     return NULL; /* not reached */
 }
 
-static int
+STATIC_INLINE int
 PerlZMQ_Raw_Context_mg_dup(pTHX_ MAGIC* const mg, CLONE_PARAMS* const param){
     PERL_UNUSED_VAR(mg);
     PERL_UNUSED_VAR(param);
     return 0;
 }
 
-static int
+STATIC_INLINE int
 PerlZMQ_Raw_Socket_mg_free(pTHX_ SV* const sv, MAGIC* const mg)
 {
     PerlZMQ_Raw_Socket* const sock = (PerlZMQ_Raw_Socket *) mg->mg_ptr;
@@ -122,7 +123,7 @@ PerlZMQ_Raw_Socket_mg_free(pTHX_ SV* const sv, MAGIC* const mg)
     return 1;
 }
 
-static int
+STATIC_INLINE int
 PerlZMQ_Raw_Socket_mg_dup(pTHX_ MAGIC* const mg, CLONE_PARAMS* const param){
 #ifdef USE_ITHREADS /* single threaded perl has no "xxx_dup()" APIs */
     mg->mg_ptr = NULL;
@@ -134,7 +135,7 @@ PerlZMQ_Raw_Socket_mg_dup(pTHX_ MAGIC* const mg, CLONE_PARAMS* const param){
     return 0;
 }
 
-static MAGIC*
+STATIC_INLINE MAGIC*
 PerlZMQ_Raw_Socket_mg_find(pTHX_ SV* const sv, const MGVTBL* const vtbl){
     MAGIC* mg;
 
@@ -152,7 +153,7 @@ PerlZMQ_Raw_Socket_mg_find(pTHX_ SV* const sv, const MGVTBL* const vtbl){
     return NULL; /* not reached */
 }
 
-static void 
+STATIC_INLINE void 
 PerlZMQ_free_string(void *data, void *hint) {
     PERL_UNUSED_VAR(hint);
     Safefree( (char *) data );
