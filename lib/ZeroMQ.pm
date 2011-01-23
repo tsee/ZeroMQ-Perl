@@ -219,13 +219,17 @@ of hashrefs:
     ], $timeout );
 
 Unfortunately this custom polling scheme doesn't play too well with AnyEvent.
+
 As of zeromq2-2.1.0, you can use getsockopt to retrieve the underlying file
 descriptor, so use that to integrate ZeroMQ and AnyEvent:
 
+    my $socket = zmq_socket( $ctxt, ZMQ_REP );
     my $fh = zmq_getsockopt( $socket, ZMQ_FD );
     my $w; $w = AE::io $fh, 0, sub {
+        while ( my $msg = zmq_recv( $socket, ZMQ_RECVMORE ) ) {
+            # do something with $msg;
+        }
         undef $w;
-        print $fh "Hello\n";
     };
 
 =head1 NOTES ON MULTI-PROCESS and MULTI-THREADED USAGE
