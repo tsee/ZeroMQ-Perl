@@ -1,9 +1,11 @@
 BEGIN {
     if (-e '.git') {
         do 'tools/check_mi_mods.pl';
+    } else {
+        require inc::Module::Install;
+        Module::Install->import;
     }
 }
-
 
 name 'ZeroMQ';
 
