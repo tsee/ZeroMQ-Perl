@@ -1,10 +1,9 @@
-use lib qw(inc);
-use Devel::CheckLib;
-
 BEGIN {
     if (-e '.git') {
         do 'tools/check_mi_mods.pl';
     } else {
+        unshift @INC, 'inc';
+        require Devel::CheckLib;
         require inc::Module::Install;
         Module::Install->import;
     }
