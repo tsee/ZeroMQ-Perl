@@ -1,3 +1,4 @@
+inc/Devel/CheckLib.pm
 Changes
 eg/hello_client.pl
 eg/hello_server.pl

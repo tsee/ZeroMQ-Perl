@@ -1,3 +1,6 @@
+use lib qw(inc);
+use Devel::CheckLib;
+
 BEGIN {
     if (-e '.git') {
         do 'tools/check_mi_mods.pl';
@@ -24,7 +27,6 @@ name 'ZeroMQ';
 }
 
 repository 'http://github.com/lestrrat/ZeroMQ-Perl';
-build_requires 'Devel::CheckLib';
 test_requires 'Test::TCP';
 test_requires 'Test::Requires';
 test_requires 'Test::Exception' => '0.29';
