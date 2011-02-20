@@ -3,44 +3,45 @@ use strict;
 use warnings;
 use feature qw(:5.10);
 use Carp();
-use ZeroMQ ();
 
-use ZeroMQ::Raw qw(zmq_poll);
-use Scalar::Util qw(blessed);
+sub new {
+    my ($class, $socket, $fd, $events, $callback) = @_;
+
+    bless {
+        _socket     => $socket,
+        _fd         => $fd,
+        _events     => $events,
+        _callback   => $callback,
+    }, $class;
+}
 
 sub new_from_hash {
     my ($class, %args) = @_;
 
     my ($socket, $fd, $events, $callback) =
         @args{qw(socket fg events callback)};
-    die "Need at least one of socket or fd" unless defined $socket or defined $fd;
 
-    bless {
-        socket      => $socket,
-        fd          => $fd,
-        events      => $events,
-        callback    => $callback,
-    }, $class;
-}
-
-sub as_hashref {
-    $_[0]->_raw_hashref
+    return $class->new($socket, $fd, $events, $callback);
 }
 
 sub events {
-    $_[0]->{events}
+    $_[0]->{_events}
 }
 
 sub callback {
-    $_[0]->{callback}
+    $_[0]->{_callback}
 }
 
 sub socket {
-    $_[0]->{socket}
+    $_[0]->{_socket}
 }
 
 sub fd {
-    $_[0]->{fd}
+    $_[0]->{_fd}
+}
+
+sub as_raw_hashref {
+    $_[0]->_raw_hashref
 }
 
 sub _raw_hashref {
@@ -52,18 +53,20 @@ sub _raw_hashref {
             callback    => $self->callback,
         };
 
-        if (defined $self->socket) {
-            $raw_hashref->{socket} = $self->socket->socket;
-        } elsif (defined $self->fd) {
-            $raw_hashref->{fd} = $self->fd;
+        if (defined $self->_raw_socket) {
+            $raw_hashref->{socket} = $self->_raw_socket;
         } else {
-            die "Need at least one of socket or fd!";
+            $raw_hashref->{fd} = $self->fd;
         }
 
         $self->{_raw_hashref} = $raw_hashref;
     }
 
     return $self->{_raw_hashref};
+}
+
+sub _raw_socket {
+    $_[0]->socket ? $_[0]->socket->socket : undef;
 }
 
 1;
