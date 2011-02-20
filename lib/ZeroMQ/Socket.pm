@@ -224,7 +224,7 @@ see the documentation for C<bind($endpoint)> above.
 =head2 send
 
 The C<send($msg, $flags)> method queues the given message to be sent to the
-socket. The flags argument is a combination of the flags defined below:
+socket. The flags argument is a combination of the flags defined below.
 
 =head2 send_as( $type, $message, $flags )
 
@@ -250,7 +250,7 @@ The C<my $msg = $sock-E<gt>recv($flags)> method receives a message from
 the socket and returns it as a new C<ZeroMQ::Message> object.
 If there are no messages available on the specified socket
 the C<recv()> method blocks until the request can be satisfied.
-The flags argument is a combination of the flags defined below:
+The flags argument is a combination of the flags defined below.
 
 =head2 recv_as( $type, $flags )
 
@@ -260,7 +260,8 @@ The flags argument is a combination of the flags defined below:
 
 Specifies that the operation should be performed in non-blocking mode.
 If there are no messages available on the specified socket, the
-C<$sock-E<gt>recv(ZMQ_NOBLOCK)> method call shall fail with errno set to EAGAIN.
+C<$sock-E<gt>recv(ZMQ_NOBLOCK)> method call returns C<undef> and sets C<$ERRNO>
+to C<EAGAIN>.
 
 =back
 

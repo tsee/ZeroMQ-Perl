@@ -202,8 +202,8 @@ your application, use a name that's different from 'json'.
 =head1 ASYNCHRONOUS I/O WITH ZEROMQ
 
 By default ZeroMQ comes with its own zmq_poll() mechanism that can handle
-non-blocking sockets. You can use this by creating calling zmq_poll with a list
-of hashrefs:
+non-blocking sockets. You can use this by calling zmq_poll with a list of
+hashrefs:
 
     zmq_poll([
         {
