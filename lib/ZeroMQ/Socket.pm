@@ -14,7 +14,7 @@ BEGIN {
         close
     );
     foreach my $method (@map) {
-        my $code = sprintf <<EOSUB, $method, $method;
+        my $code = << "EOSUB";
             sub $method {
                 my \$self = shift;
                 ZeroMQ::Raw::zmq_$method( \$self->socket, \@_ );
