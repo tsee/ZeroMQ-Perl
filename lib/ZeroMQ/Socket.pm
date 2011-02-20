@@ -3,6 +3,8 @@ use strict;
 use Carp();
 use ZeroMQ ();
 
+use Scalar::Util qw(blessed);
+
 BEGIN {
     my @map = qw(
         setsockopt
@@ -53,7 +55,7 @@ sub recv {
 sub send {
     my ($self, $msg, $flags) = @_;
 
-    if (eval { $msg->isa( 'ZeroMQ::Message' ) } ) {
+    if (blessed $msg and $msg->isa( 'ZeroMQ::Message' ) ) {
         $msg = $msg->message;
     }
 
