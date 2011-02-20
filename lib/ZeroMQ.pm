@@ -8,6 +8,8 @@ use ZeroMQ::Raw ();
 use ZeroMQ::Context;
 use ZeroMQ::Socket;
 use ZeroMQ::Message;
+use ZeroMQ::Poller;
+use ZeroMQ::PollItem;
 use ZeroMQ::Constants;
 use 5.008;
 use Carp ();
