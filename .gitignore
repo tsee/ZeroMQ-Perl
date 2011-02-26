@@ -1,6 +1,5 @@
 ZeroMQ-*.tar.gz
 Makefile
-blib
 pm_to_blib
 *~
 *.tmp
@@ -15,3 +14,12 @@ Build
 blib
 _build
 MYMETA.yml
+META.yml
+inc/
+ppport.h
+xshelper.h
+ZeroMQ.bs
+xs/mg-xs.inc
+xs/typemap
+xs/*.c
+xs/*.o
