@@ -299,7 +299,7 @@ of the options, please refer to the 0MQ manual.
 
 =head2 setsockopt
 
-The C<$sock-E>gt>setsockopt(ZMQ_SOME_OPTION, $value)> method call
+The C<$sock-E<gt>setsockopt(ZMQ_SOME_OPTION, $value)> method call
 sets the specified option to the given value.
 
 The following socket options can be set. For details, please
@@ -336,7 +336,7 @@ refer to the 0MQ manual:
 C<ZeroMQ::Socket> objects aren't thread safe due to the
 underlying library. Therefore, they are currently not cloned when
 a new Perl ithread is spawned. The variables in the new thread
-that contained the context in the parent thread will be a
+that contained the socket in the parent thread will be a
 scalar reference to C<undef> in the new thread.
 This makes the Perl wrapper thread safe (i.e. no segmentation faults).
 
