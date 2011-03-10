@@ -17,7 +17,9 @@ sub new {
 
 sub poll {
     my ($self, $timeout) = @_;
-    $timeout //= -1;
+    if (! defined $timeout ) {
+        $timeout = -1;
+    }
 
     $self->_clear_events();
     zmq_poll($self->_raw_poll_items, $timeout);
