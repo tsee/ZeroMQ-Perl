@@ -1,4 +1,3 @@
-inc/Devel/CheckLib.pm
 Changes
 eg/hello_client.pl
 eg/hello_server.pl
@@ -11,6 +10,7 @@ eg/remote_lat.pl
 eg/thread_0mq.pl
 eg/threaded_client.pl
 eg/threaded_server.pl
+inc/Devel/CheckLib.pm
 inc/Module/Install.pm
 inc/Module/Install/AuthorTests.pm
 inc/Module/Install/Base.pm
@@ -27,6 +27,7 @@ lib/ZeroMQ.pm
 lib/ZeroMQ/Constants.pm
 lib/ZeroMQ/Context.pm
 lib/ZeroMQ/Message.pm
+lib/ZeroMQ/Poller.pm
 lib/ZeroMQ/Raw.pm
 lib/ZeroMQ/Socket.pm
 Makefile.PL
@@ -45,6 +46,8 @@ t/100_basic.t
 t/101_threads.t
 t/103_json.t
 t/104_ipc.t
+t/105_poll.t
+t/cover.sh
 t/rt64944.t
 tools/check_mi_mods.pl
 tools/genfiles.pl
@@ -57,6 +60,7 @@ xt/103_eg_xreqxrep.t
 xt/999_leak.t
 xt/999_pod-coverage.t
 xt/999_pod.t
+xt/pubsub_stress.t
 xt/rt64836.t
 xt/rt64836_lowlevel.t
 xt/rt64944.t

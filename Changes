@@ -1,10 +1,13 @@
 Changelog for Perl module ZeroMQ.
 
+0.09_01 Fri Mar 11 2011 08:00 JST
+  - Add ZeroMQ::Poller (https://github.com/lestrrat/ZeroMQ-Perl/pull/8)
+
 0.09 Wed Feb 16 2011 22:30 JST
   - Only run silly Module::Install hoopla if you're an author
   - Tweak Makefile.PL
   - Smarter zmq.h detection
-  - Include Devel::CheckLig in requires
+  - Include Devel::CheckLib in requires
 
 0.08 Sun Jan 23 2011 14:45 JST
   - Fixed many memory leaks (rt #64944) reported by Jason Ball
