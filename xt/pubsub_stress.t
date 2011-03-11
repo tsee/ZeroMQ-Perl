@@ -1,8 +1,10 @@
 use strict;
-use Data::UUID;
-use Parallel::ForkManager;
-use Test::SharedFork;
-use Time::HiRes ();
+use Test::Requires qw(
+    Data::UUID
+    Parallel::ForkManager
+    Time::HiRes
+    Test::SharedFork
+);
 use Test::More;
 use ZeroMQ::Raw;
 use ZeroMQ::Constants qw(:all);
