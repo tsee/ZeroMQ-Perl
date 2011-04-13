@@ -1,5 +1,10 @@
 Changelog for Perl module ZeroMQ.
 
+0.10 Wed Apr 13 2011 10:30 JST
+  - Use Module::Instsall::CheckLib
+  - Silence test failures [https://github.com/lestrrat/ZeroMQ-Perl/issues/11]
+    (reported by oyvindsk)
+
 0.09_01 Fri Mar 11 2011 08:00 JST
   - Add ZeroMQ::Poller (https://github.com/lestrrat/ZeroMQ-Perl/pull/8)
 
