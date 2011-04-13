@@ -32,10 +32,17 @@ subtest 'basic inproc communication' => sub {
 
     ok(!defined($sock->recv(ZMQ_NOBLOCK)), "recv before sending anything should return nothing");
     ok($client->send( ZeroMQ::Message->new("Talk to me") ) == 0);
-    
-    ok(!$sock->getsockopt(ZMQ_RCVMORE), "no ZMQ_RCVMORE set");
-    ok($sock->getsockopt(ZMQ_AFFINITY) == 0, "no ZMQ_AFFINITY");
-    ok($sock->getsockopt(ZMQ_RATE) == 100, "ZMQ_RATE is at default 100");
+
+    # These tests are potentially dangerous when upgrades happen....
+    # I thought of plain removing, but I'll leave it for now
+    my ($major, $minor, $micro) = ZeroMQ::version();
+    SKIP: {
+        skip( "Need to be exactly zeromq 2.1.0", 3 )
+            if ($major != 2 || $minor != 1 || $micro != 0);
+        ok(!$sock->getsockopt(ZMQ_RCVMORE), "no ZMQ_RCVMORE set");
+        ok($sock->getsockopt(ZMQ_AFFINITY) == 0, "no ZMQ_AFFINITY");
+        ok($sock->getsockopt(ZMQ_RATE) == 100, "ZMQ_RATE is at default 100");
+    }
 
     my $msg = $sock->recv();
     ok(defined $msg, "received defined msg");
