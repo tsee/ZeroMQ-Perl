@@ -25,6 +25,8 @@ name 'ZeroMQ';
     }
 }
 
+checklibs lib => 'zmq', header => 'zmq.h';
+
 repository 'http://github.com/lestrrat/ZeroMQ-Perl';
 requires 'Task::Weaken';
 test_requires 'Test::More', '0.98';
