@@ -3,7 +3,6 @@ BEGIN {
         do 'tools/check_mi_mods.pl';
     } else {
         unshift @INC, 'inc';
-        require Devel::CheckLib;
         require inc::Module::Install;
         Module::Install->import;
     }
@@ -27,6 +26,13 @@ name 'ZeroMQ';
 
 checklibs lib => 'zmq', header => 'zmq.h';
 
+do 'tools/detect_zmq.pl';
+print "Detected the following ZMQ settings:\n";
+foreach my $env (qw(ZMQ_HOME ZMQ_H ZMQ_INCLUDES ZMQ_LIBS)) {
+    print " + $env = $ENV{$env}\n";
+}
+
+
 repository 'http://github.com/lestrrat/ZeroMQ-Perl';
 requires 'Task::Weaken';
 test_requires 'Test::More', '0.98';
@@ -38,12 +44,9 @@ use_xshelper '-clean';
 
 use_ppport;
 cc_warnings;
-if ($ENV{INCLUDES}) {
-    cc_include_paths split/\s+/, $ENV{INCLUDES};
-}
-if ($ENV{LIBS}) {
-    cc_libs $ENV{LIBS};
-}
+cc_include_paths split/\s+/, $ENV{ZMQ_INCLUDES};
+cc_libs $ENV{ZMQ_LIBS};
+cc_include_paths 'xs';
 cc_src_paths 'xs';
 cc_assert_lib 'zmq';
 cc_libs 'zmq', 'uuid'; # uuid for cygwin, but can't hurt
