@@ -28,8 +28,8 @@ checklibs lib => 'zmq', header => 'zmq.h';
 
 do 'tools/detect_zmq.pl';
 print "Detected the following ZMQ settings:\n";
-foreach my $env (qw(ZMQ_HOME ZMQ_H ZMQ_INCLUDES ZMQ_LIBS)) {
-    print " + $env = $ENV{$env}\n";
+foreach my $env (qw(ZMQ_HOME ZMQ_H ZMQ_INCLUDES ZMQ_LIBS ZMQ_TRACE)) {
+    printf " + %s = %s\n", $env, exists $ENV{$env} ? $ENV{$env} : "(null)";
 }
 
 
@@ -50,6 +50,9 @@ cc_include_paths 'xs';
 cc_src_paths 'xs';
 cc_assert_lib 'zmq';
 cc_libs 'zmq', 'uuid'; # uuid for cygwin, but can't hurt
+if ($ENV{ZMQ_TRACE}) {
+    cc_define qq|-DPERLZMQ_TRACE=$ENV{ZMQ_TRACE}|;
+}
 
 default_test_target 
     env => {

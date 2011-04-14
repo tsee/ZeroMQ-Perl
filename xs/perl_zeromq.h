@@ -7,7 +7,9 @@
 #include <zmq.h>
 #include <errno.h>
 
+#ifndef PERLZMQ_TRACE
 #define PERLZMQ_TRACE 0
+#endif
 #define _ERRNO        errno
 #define SET_BANG      PerlZMQ_set_bang(aTHX_ _ERRNO)
 
