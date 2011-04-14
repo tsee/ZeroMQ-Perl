@@ -4,7 +4,7 @@ use Test::Exception;
 
 BEGIN {
     use_ok "ZeroMQ::Constants", qw(
-        ZMQ_DOWNSTREAM
+        ZMQ_PUSH
         ZMQ_REP
         ZMQ_REQ
     );
@@ -34,7 +34,7 @@ subtest 'simple creation and destroy' => sub {
 subtest 'connect to a non-existent addr' => sub {
     lives_ok {
         my $context = zmq_init(1);
-        my $socket  = zmq_socket( $context, ZMQ_DOWNSTREAM );
+        my $socket  = zmq_socket( $context, ZMQ_PUSH );
 
         TODO: {
             todo_skip "I get 'Assertion failed: rc == 0 (zmq_connecter.cpp:46)'", 2;
