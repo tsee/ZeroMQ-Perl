@@ -52,6 +52,7 @@ t/cover.sh
 t/rt64944.t
 tools/check_mi_mods.pl
 tools/genfiles.pl
+tools/detect_zmq.pl
 xs/perl_zeromq.h
 xs/perl_zeromq.xs
 xt/100_eg_hello_world.t
