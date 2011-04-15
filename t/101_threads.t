@@ -17,18 +17,19 @@ use ZeroMQ qw/:all/;
     my $cxt = ZeroMQ::Context->new(1);
     isa_ok($cxt, 'ZeroMQ::Context');
 
-    my $main_socket = $cxt->socket(ZMQ_UPSTREAM);
+    my $main_socket = $cxt->socket(ZMQ_PUSH);
     isa_ok($main_socket, "ZeroMQ::Socket");
     $main_socket->close;
+
     my $t = threads->new(sub {
         note "created thread " . threads->tid;
-        my $sock = $cxt->socket( ZMQ_UPSTREAM );
+        my $sock = $cxt->socket( ZMQ_PAIR );
         ok $sock, "created server socket";
         lives_ok {
             $sock->bind("inproc://myPrivateSocket");
         } "bound server socket";
     
-        my $client = $cxt->socket(ZMQ_DOWNSTREAM); # sender
+        my $client = $cxt->socket(ZMQ_PAIR); # sender
         ok $client, "created client socket";
         lives_ok {
             $client->connect("inproc://myPrivateSocket");
@@ -36,7 +37,10 @@ use ZeroMQ qw/:all/;
 
         $client->send( "Wee Woo" );
         my $data = $sock->recv();
-        my $ok = is $data->data, "Wee Woo", "got same message";
+        my $ok = 0;
+        if (ok $data) {
+            $ok = is $data->data, "Wee Woo", "got same message";
+        }
         return $ok;
     });
 

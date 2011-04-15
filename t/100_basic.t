@@ -8,29 +8,29 @@ use Storable qw/nfreeze thaw/;
 
 subtest 'connect before server socket is bound (should fail)' => sub {
     my $cxt = ZeroMQ::Context->new;
-    my $sock = $cxt->socket(ZMQ_UPSTREAM); # Receiver
+    my $sock = $cxt->socket(ZMQ_PAIR); # Receiver
 
     # too early, server socket not created:
-    my $client = $cxt->socket(ZMQ_DOWNSTREAM);
+    my $client = $cxt->socket(ZMQ_PAIR);
     eval { $client->connect("inproc://myPrivateSocket"); };
     ok($@ && "$@" =~ /Connection refused/);
 };
 
 subtest 'basic inproc communication' => sub {
     my $cxt = ZeroMQ::Context->new;
-    my $sock = $cxt->socket(ZMQ_UPSTREAM); # Receiver
+    my $sock = $cxt->socket(ZMQ_PAIR); # Receiver
     eval {
         $sock->bind("inproc://myPrivateSocket");
     };
     ok !$@, "bind to inproc socket";
 
-    my $client = $cxt->socket(ZMQ_DOWNSTREAM); # sender
+    my $client = $cxt->socket(ZMQ_PAIR); # sender
     eval {
         $client->connect("inproc://myPrivateSocket");
     };
     ok !$@, "connect to inproc socket";
 
-    ok(!defined($sock->recv(ZMQ_NOBLOCK)), "recv before sending anything should return nothing");
+    ok(!defined($sock->recv(ZMQ_NOBLOCK())), "recv before sending anything should return nothing");
     ok($client->send( ZeroMQ::Message->new("Talk to me") ) == 0);
 
     # These tests are potentially dangerous when upgrades happen....
