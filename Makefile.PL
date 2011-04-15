@@ -60,6 +60,7 @@ default_test_target
     }
 ;
 author_tests 'xt';
+clean_files "xs/*.inc";
 
 do 'tools/genfiles.pl';
 WriteAll;
