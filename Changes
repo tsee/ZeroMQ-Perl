@@ -1,5 +1,9 @@
 Changelog for Perl module ZeroMQ.
 
+0.12 Fri Apr 15 2011 15:35 JST
+  - Add missing tools/detect_zmq.pl which implemented the detection
+    scheme introduced in 0.11
+
 0.11 Fri Apr 15 2011 15:30 JST
   - Make header, incpath, lib detection smarter. 
     * Now supports pkg-config!
