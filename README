@@ -57,9 +57,14 @@ INSTALLATION
         make test
         make install
 
-    If you don't have pkg-config, and libzmq is installed: # under
-    /usr/local/libzmq ZMQ_HOME=/usr/local/libzmq \ perl Makefile.PL make
-    make test make install
+    If you don't have pkg-config, and libzmq is installed under
+    /usr/local/libzmq:
+
+        ZMQ_HOME=/usr/local/libzmq \
+            perl Makefile.PL
+        make
+        make test
+        make install
 
     If you want to customize include directories and such:
 
@@ -247,12 +252,18 @@ FUNCTIONS
 
 CAVEATS
     This is an early release. Proceed with caution, please report (or better
-    yet: fix) bugs you encounter. Tested againt 0MQ 2.1.0.
+    yet: fix) bugs you encounter.
+
+    This module has been tested againt zeromq 2.1.4. Semantics of this
+    module rely heavily on the underlying zeromq version. Make sure you know
+    which version of zeromq you're working with.
 
 SEE ALSO
-    ZeroMQ::Context, ZeroMQ::Socket, ZeroMQ::Message
+    ZeroMQ::Raw, ZeroMQ::Context, ZeroMQ::Socket, ZeroMQ::Message
 
     <http://zeromq.org>
+
+    <http://github.com/lestrrat/ZoroMQ-Perl>
 
 AUTHOR
     Daisuke Maki "<daisuke@endeworks.jp>"
