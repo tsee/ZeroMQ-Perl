@@ -102,8 +102,8 @@ If you have want to use libzmq registered with pkg-config:
     make test
     make install
 
-If you don't have pkg-config, and libzmq is installed:
-    # under /usr/local/libzmq
+If you don't have pkg-config, and libzmq is installed under /usr/local/libzmq:
+
     ZMQ_HOME=/usr/local/libzmq \
         perl Makefile.PL
     make
@@ -302,13 +302,19 @@ The callback receives the Perl structure given to C<send_as()>
 =head1 CAVEATS
 
 This is an early release. Proceed with caution, please report
-(or better yet: fix) bugs you encounter. Tested againt 0MQ 2.1.0.
+(or better yet: fix) bugs you encounter.
+
+This module has been tested againt B<zeromq 2.1.4>. Semantics of this
+module rely heavily on the underlying zeromq version. Make sure
+you know which version of zeromq you're working with.
 
 =head1 SEE ALSO
 
-L<ZeroMQ::Context>, L<ZeroMQ::Socket>, L<ZeroMQ::Message>
+L<ZeroMQ::Raw>, L<ZeroMQ::Context>, L<ZeroMQ::Socket>, L<ZeroMQ::Message>
 
 L<http://zeromq.org>
+
+L<http://github.com/lestrrat/ZoroMQ-Perl>
 
 =head1 AUTHOR
 
