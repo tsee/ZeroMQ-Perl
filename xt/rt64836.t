@@ -48,6 +48,7 @@ test_tcp(
         }
         $sock->send("end"); # end of data stream...
         note "Sent all messages";
+        exit 0;
     }
 );
 

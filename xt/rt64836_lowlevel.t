@@ -48,6 +48,7 @@ test_tcp(
         zmq_send( $sock, "end" );
         note "Sent all messages";
         note "Server exiting...";
+        exit 0;
     }
 );
 
