@@ -38,6 +38,7 @@ test_tcp(
         note "Waiting...";
         my $msg = $cv->recv;
         zmq_send( $sock, zmq_msg_data( $msg ) );
+        exit 0;
     }
 );
 
