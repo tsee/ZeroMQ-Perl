@@ -114,7 +114,7 @@ subtest 'non-blocking recv (success)' => sub {
 };
     
 # Code excercising AnyEvent + ZMQ_FD to do non-blocking recv
-if (eval { require AnyEvent } && ! $@) {
+if ($^O ne 'MSWin32' && eval { require AnyEvent } && ! $@) {
     AnyEvent->import; # want AE namespace
     subtest 'non-blocking recv with AnyEvent (success)' => sub {
         test_tcp(

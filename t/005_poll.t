@@ -8,17 +8,20 @@ BEGIN {
 }
 
 subtest 'basic poll with fd' => sub {
-    lives_ok {
-        my $called = 0;
-        zmq_poll([
-            {
-                fd       => fileno(STDOUT),
-                events   => ZMQ_POLLOUT,
-                callback => sub { $called++ }
-            }
-        ], 1);
-        ok $called, "callback called";
-    } "PollItem doesn't die";
+    SKIP: {
+        skip "Can't poll using fds on Windows", 2 if ($^O eq 'MSWin32');
+        lives_ok {
+            my $called = 0;
+            zmq_poll([
+                {
+                    fd       => fileno(STDOUT),
+                    events   => ZMQ_POLLOUT,
+                    callback => sub { $called++ }
+                }
+            ], 1);
+            ok $called, "callback called";
+        } "PollItem doesn't die";
+    }
 };
 
 subtest 'poll with zmq sockets' => sub {
