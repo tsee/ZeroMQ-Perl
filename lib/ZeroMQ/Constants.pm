@@ -12,6 +12,7 @@ BEGIN {
         ZMQ_LINGER
         ZMQ_EVENTS
         ZMQ_RECONNECT_IVL
+        ZMQ_SWAP
         ZMQ_TYPE
         ZMQ_VERSION
         ZMQ_VERSION_MAJOR
