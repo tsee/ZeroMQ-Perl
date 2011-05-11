@@ -24,14 +24,21 @@ name 'ZeroMQ';
     }
 }
 
-checklibs lib => 'zmq', header => 'zmq.h';
-
 do 'tools/detect_zmq.pl';
 print "Detected the following ZMQ settings:\n";
 foreach my $env (qw(ZMQ_HOME ZMQ_H ZMQ_INCLUDES ZMQ_LIBS ZMQ_TRACE)) {
     printf " + %s = %s\n", $env, exists $ENV{$env} ? $ENV{$env} : "(null)";
 }
 
+# XXX As of Devel::CheckLib 0.93, it seems like LIBS = "-L/path/to/foo"
+# gets ignored (unlike what the docs say). So we manually strip and
+# re-arrange the paths here
+assertlibs
+    lib => 'zmq',
+    header => 'zmq.h',
+    incpath => [ split /\s+/, $ENV{ZMQ_INCLUDES} ],
+    libpath => [ grep { -d $_ } map { s/^-L//; $_ } split /\s+/, $ENV{ZMQ_LIBS} ]
+;
 
 repository 'http://github.com/lestrrat/ZeroMQ-Perl';
 requires 'Task::Weaken';
