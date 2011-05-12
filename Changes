@@ -1,5 +1,10 @@
 Changelog for Perl module ZeroMQ.
 
+0.13 Thu May 12 2011 17:00 JST
+  - Fix problems introduced by using Devel::CheckLib + ZMQ_HOME et al.
+    Problem reported by Johan Ström (rt #68108)
+  - Respect PKG_CONFIG_PATH when probing for zeromq
+
 0.12 Fri Apr 15 2011 15:35 JST
   - Add missing tools/detect_zmq.pl which implemented the detection
     scheme introduced in 0.11
