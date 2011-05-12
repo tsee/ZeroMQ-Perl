@@ -77,16 +77,16 @@ sub probe_pkgconfig {
 
         print " + found $pkg $version\n";
         if (! $ENV{ZMQ_INCLUDES}) {
-            if (my $cflags = qx/pkg-config --cflags-only-I $pkg/) {
+            if (my $cflags = qx/$pkg_config --cflags-only-I $pkg/) {
                 chomp $cflags;
-                print " + Detected ZMQ_INCLUDES from pkg-config...\n";
+                print " + Detected ZMQ_INCLUDES from $pkg_config...\n";
                 my @paths = map { s/^-I//; $_ } split /\s+/, $cflags;
                 $ENV{ZMQ_INCLUDES} = join ' ', @paths;
                 if (! $ENV{ZMQ_H}) {
                     foreach my $path (@paths) {
                         my $zmq_h = File::Spec->catfile($path, 'zmq.h');
                         if (-f $zmq_h) {
-                            print " + Detected ZMQ_H from pkg-config...\n";
+                            print " + Detected ZMQ_H from $pkg_config...\n";
                             $ENV{ZMQ_H} = $zmq_h;
                             last;
                         }
@@ -96,9 +96,9 @@ sub probe_pkgconfig {
         }
 
         if (! $ENV{ZMQ_LIBS}) {
-            if (my $libs = qx/pkg-config --libs $pkg/) {
+            if (my $libs = qx/$pkg_config --libs $pkg/) {
                 chomp $libs;
-                print " + Detected ZMQ_LIBS from pkg-config...\n";
+                print " + Detected ZMQ_LIBS from $pkg_config...\n";
                 $ENV{ZMQ_LIBS} = $libs;
             }
         }
