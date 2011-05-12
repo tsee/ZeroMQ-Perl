@@ -1,5 +1,8 @@
 Changelog for Perl module ZeroMQ.
 
+0.14 Thu May 12 2011 17:05 JST
+  - Argh, forgot to change all the occurances of pkg-config to $pkg_config
+
 0.13 Thu May 12 2011 17:00 JST
   - Fix problems introduced by using Devel::CheckLib + ZMQ_HOME et al.
     Problem reported by Johan Ström (rt #68108)

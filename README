@@ -50,7 +50,7 @@ SYNOPSIS ( LOW-LEVEL API )
         my $msg  = zmq_recv( $sock, $flags );
 
 INSTALLATION
-    If you have want to use libzmq registered with pkg-config:
+    If you have libzmq registered with pkg-config:
 
         perl Makefile.PL
         make 
