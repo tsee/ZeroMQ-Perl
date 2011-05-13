@@ -10,6 +10,7 @@ THISDIR=$(dirname $ABSPATH)
 
 $PERL $THISDIR/cpanm -l extlib Module::Install
 $PERL $THISDIR/cpanm -l extlib Module::Install::AuthorTests
+$PERL $THISDIR/cpanm -l extlib Module::Install::CheckLib
 $PERL $THISDIR/cpanm -l extlib Module::Install::ReadmeFromPod
 $PERL $THISDIR/cpanm -l extlib Module::Install::TestTarget
 $PERL $THISDIR/cpanm -l extlib Module::Install::XSUtil
