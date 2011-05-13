@@ -8,6 +8,8 @@ THISDIR=$(dirname $ABSPATH)
 [ -z $MAKE ] && MAKE=$(which make)
 [ -z $PERL ] && PERL=$(which perl)
 
+echo "Using perl = $PERL, cpanm = $THISDIR/cpanm"
+
 $PERL $THISDIR/cpanm -l extlib Module::Install
 $PERL $THISDIR/cpanm -l extlib Module::Install::AuthorTests
 $PERL $THISDIR/cpanm -l extlib Module::Install::CheckLib
