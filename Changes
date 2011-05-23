@@ -1,5 +1,13 @@
 Changelog for Perl module ZeroMQ.
 
+0.15 Mon May 23 2011 17:30 JST
+  - Do not use PKG_CONFIG_PATH as the path to pkg-config binary.
+    If for some reason you want to use a different pkg-config than
+    in your PATH, use PKGCONFIG_CMD environmental variable.
+    Reported by Johan Ström (rt #68108)
+  - Doc tweaks
+  - Fix/update autobuild tools used in Jenkins tests.
+
 0.14 Thu May 12 2011 17:05 JST
   - Argh, forgot to change all the occurances of pkg-config to $pkg_config
 
