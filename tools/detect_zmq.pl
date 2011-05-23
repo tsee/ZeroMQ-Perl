@@ -65,7 +65,7 @@ sub probe_envvars {
 # Note: At this point probe_envvars should have taken care merging
 # deprecated INCLUDES/LIBS into %ENV
 sub probe_pkgconfig {
-    my $pkg_config = $ENV{ PKG_CONFIG_PATH } || 'pkg-config';
+    my $pkg_config = $ENV{ PKGCONFIG_CMD } || 'pkg-config';
     foreach my $pkg ( qw(libzmq zeromq2) ) {
         print "Probing $pkg via $pkg_config ...\n";
         my $version = qx/$pkg_config --modversion $pkg/;
