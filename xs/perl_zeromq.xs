@@ -309,6 +309,7 @@ PerlZMQ_Raw_zmq_msg_close(message)
         PerlZMQ_Raw_Message *message;
     CODE:
         RETVAL = zmq_msg_close(message);
+        Safefree(message);
     OUTPUT:
         RETVAL
 
