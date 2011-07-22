@@ -37,6 +37,7 @@ PerlZMQ_Raw_Message_mg_free( pTHX_ SV * const sv, MAGIC *const mg ) {
     PERL_UNUSED_VAR(sv);
     if ( msg != NULL ) {
         zmq_msg_close( msg );
+        Safefree( msg );
     }
     return 1;
 }
