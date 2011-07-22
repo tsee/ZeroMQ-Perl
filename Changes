@@ -1,5 +1,12 @@
 Changelog for Perl module ZeroMQ.
 
+0.16 Sat Jul 23 2011 08:00 JST
+  - Fix memory leaks
+    * rt #69572
+    * https://github.com/lestrrat/ZeroMQ-Perl/pull/17 (linuxfood)
+  - Make sure to check for libzmq 2.1.x, as we don't support anything else
+    on this release
+
 0.15 Mon May 23 2011 17:30 JST
   - Do not use PKG_CONFIG_PATH as the path to pkg-config binary.
     If for some reason you want to use a different pkg-config than
