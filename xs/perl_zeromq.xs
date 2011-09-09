@@ -1,4 +1,3 @@
-
 #include "perl_zeromq.h"
 #include "xshelper.h"
 
@@ -539,6 +538,7 @@ PerlZMQ_Raw_zmq_setsockopt(sock, option, value)
         const char *ptr;
         uint64_t u64;
         int64_t  i64;
+        int i;
     CODE:
         switch(option){
             case ZMQ_IDENTITY:
@@ -562,6 +562,11 @@ PerlZMQ_Raw_zmq_setsockopt(sock, option, value)
             case ZMQ_RCVBUF:
                 u64 = SvUV(value);
                 RETVAL = zmq_setsockopt(sock, option, &u64, sizeof(uint64_t));
+                break;
+
+            case ZMQ_LINGER:
+                i = SvIV(value);
+                RETVAL = zmq_setsockopt(sock, option, &i, sizeof(i));
                 break;
 
             default:
