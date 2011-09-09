@@ -1,5 +1,9 @@
 Changelog for Perl module ZeroMQ.
 
+0.17 Fri Sep 09 2011 12:40 JST
+  - Add support for ZMQ_LINGER in setsockopt (sebnow)
+    https://github.com/lestrrat/ZeroMQ-Perl/pull/19
+
 0.16 Sat Jul 23 2011 08:00 JST
   - Fix memory leaks
     * rt #69572
