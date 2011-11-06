@@ -65,14 +65,14 @@ sub send {
 }
 
 sub recv_as {
-    my ($self, $type) = @_;
+    my ($self, $type, $flags) = @_;
 
     my $deserializer = ZeroMQ->_get_deserializer( $type );
     if (! $deserializer ) {
         Carp::croak("No deserializer $type found");
     }
 
-    my $msg = $self->recv();
+    my $msg = $self->recv( $flags );
     $deserializer->( $msg->data );
 }
 
