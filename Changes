@@ -1,5 +1,8 @@
 Changelog for Perl module ZeroMQ.
 
+0.18 Nov 06 2011
+  - Pass $flags in ZeroMQ::Socket->recv_as() as is documented
+
 0.17 Fri Sep 09 2011 12:40 JST
   - Add support for ZMQ_LINGER in setsockopt (sebnow)
     https://github.com/lestrrat/ZeroMQ-Perl/pull/19
