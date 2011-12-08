@@ -47,6 +47,7 @@ my $server = Test::TCP->new(code => sub {
     }
 
     zmq_send( $sock, zmq_msg_data( $msg ) );
+    exit 0;
 });
 
 my $port = $server->port;
