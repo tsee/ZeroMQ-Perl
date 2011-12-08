@@ -27,7 +27,12 @@ typedef struct {
     void   *ctxt;
 } PerlZMQ_Raw_Context;
 #endif
-typedef void      PerlZMQ_Raw_Socket;
+
+typedef struct {
+    void *socket;
+    SV   *assoc_ctxt; /* keep context around with sockets so we know */
+} PerlZMQ_Raw_Socket;
+
 typedef zmq_msg_t PerlZMQ_Raw_Message;
 
 typedef struct {

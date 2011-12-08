@@ -63,6 +63,8 @@ STATIC_INLINE int
 PerlZMQ_Raw_Context_mg_free( pTHX_ SV * const sv, MAGIC *const mg ) {
     PerlZMQ_Raw_Context* const ctxt = (PerlZMQ_Raw_Context *) mg->mg_ptr;
     PERL_UNUSED_VAR(sv);
+
+    PerlZMQ_trace("START mg_free (Context)");
     if (ctxt != NULL) {
 #ifdef USE_ITHREADS
         if ( ctxt->interp == aTHX ) { /* is where I came from */
@@ -72,11 +74,13 @@ PerlZMQ_Raw_Context_mg_free( pTHX_ SV * const sv, MAGIC *const mg ) {
             Safefree(ctxt);
         }
 #else
-        PerlZMQ_trace("Context_free for zmq context %p", ctxt);
+        PerlZMQ_trace(" + zmq context %p", ctxt);
+        PerlZMQ_trace(" + are we in global destruction? %s", PL_dirty ? "YES" : "NO");
         zmq_term( ctxt );
         mg->mg_ptr = NULL;
 #endif
     }
+    PerlZMQ_trace("END mg_free (Context)");
     return 1;
 }
 
@@ -106,14 +110,38 @@ PerlZMQ_Raw_Context_mg_dup(pTHX_ MAGIC* const mg, CLONE_PARAMS* const param){
 }
 
 STATIC_INLINE int
+PerlZMQ_Raw_Socket_invalidate( PerlZMQ_Raw_Socket *sock )
+{
+    SV *ctxt_sv = sock->assoc_ctxt;
+    int rv;
+
+    PerlZMQ_trace("START socket_invalidate");
+    PerlZMQ_trace(" + zmq socket %p", sock->socket);
+    rv = zmq_close( sock->socket );
+
+    if ( SvOK(ctxt_sv) ) {
+        PerlZMQ_trace(" + associated context: %p", ctxt_sv);
+        SvREFCNT_dec(ctxt_sv);
+        sock->assoc_ctxt = NULL;
+    }
+
+    Safefree(sock);
+
+    PerlZMQ_trace("END socket_invalidate");
+    return rv;
+}
+
+STATIC_INLINE int
 PerlZMQ_Raw_Socket_mg_free(pTHX_ SV* const sv, MAGIC* const mg)
 {
     PerlZMQ_Raw_Socket* const sock = (PerlZMQ_Raw_Socket *) mg->mg_ptr;
     PERL_UNUSED_VAR(sv);
+    PerlZMQ_trace("START mg_free (Socket)");
     if (sock) {
-        PerlZMQ_trace("Socket_free %p", sock);
-        zmq_close( sock );
+        PerlZMQ_Raw_Socket_invalidate( sock );
+        mg->mg_ptr = NULL;
     }
+    PerlZMQ_trace("END mg_free (Socket)");
     return 1;
 }
 
@@ -338,12 +366,17 @@ PerlZMQ_Raw_zmq_socket (ctxt, type)
     PREINIT:
         SV *class_sv = sv_2mortal(newSVpvn( "ZeroMQ::Raw::Socket", 19 ));
     CODE:
+        Newxz( RETVAL, 1, PerlZMQ_Raw_Socket );
+        RETVAL->assoc_ctxt = NULL;
+        RETVAL->socket = NULL;
 #ifdef USE_ITHREADS
-        RETVAL = zmq_socket( ctxt->ctxt, type );
+        RETVAL->socket = zmq_socket( ctxt->ctxt, type );
 #else
-        RETVAL = zmq_socket( ctxt, type );
+        RETVAL->socket = zmq_socket( ctxt, type );
 #endif
-        PerlZMQ_trace( "created socket %p", RETVAL );
+        RETVAL->assoc_ctxt = ST(0);
+        SvREFCNT_inc(RETVAL->assoc_ctxt);
+        PerlZMQ_trace( "zmq_socket: created socket %p for context %p", RETVAL, ctxt );
     OUTPUT:
         RETVAL
 
@@ -351,12 +384,14 @@ int
 PerlZMQ_Raw_zmq_close(socket)
         PerlZMQ_Raw_Socket *socket;
     CODE:
-        RETVAL = zmq_close(socket);
-        if (RETVAL == 0) {
-            /* Cancel the SV's mg attr so to not call zmq_term automatically */
+        RETVAL = PerlZMQ_Raw_Socket_invalidate( socket );
+        /* Cancel the SV's mg attr so to not call socket_invalidate again
+           during Socket_mg_free
+        */
+        {
             MAGIC *mg =
-                PerlZMQ_Raw_Socket_mg_find( aTHX_ SvRV(ST(0)), &PerlZMQ_Raw_Socket_vtbl );
-            mg->mg_ptr = NULL;
+                 PerlZMQ_Raw_Socket_mg_find( aTHX_ SvRV(ST(0)), &PerlZMQ_Raw_Socket_vtbl );
+             mg->mg_ptr = NULL;
         }
     OUTPUT:
         RETVAL
@@ -366,7 +401,8 @@ PerlZMQ_Raw_zmq_connect(socket, addr)
         PerlZMQ_Raw_Socket *socket;
         char *addr;
     CODE:
-        RETVAL = zmq_connect( socket, addr );
+        PerlZMQ_trace( "zmq_connect: socket %p", socket );
+        RETVAL = zmq_connect( socket->socket, addr );
         if (RETVAL != 0) {
             croak( "%s", zmq_strerror( zmq_errno() ) );
         }
@@ -378,7 +414,8 @@ PerlZMQ_Raw_zmq_bind(socket, addr)
         PerlZMQ_Raw_Socket *socket;
         char *addr;
     CODE:
-        RETVAL = zmq_bind( socket, addr );
+        PerlZMQ_trace( "zmq_bind: socket %p", socket );
+        RETVAL = zmq_bind( socket->socket, addr );
         if (RETVAL != 0) {
             croak( "%s", zmq_strerror( zmq_errno() ) );
         }
@@ -394,21 +431,22 @@ PerlZMQ_Raw_zmq_recv(socket, flags = 0)
         int rv;
         zmq_msg_t msg;
     CODE:
+        PerlZMQ_trace( "START zmq_recv" );
         RETVAL = NULL;
         zmq_msg_init(&msg);
-        rv = zmq_recv(socket, &msg, flags);
-        PerlZMQ_trace("zmq recv with flags %d", flags);
-        PerlZMQ_trace("zmq_recv returned with rv '%d'", rv);
+        rv = zmq_recv(socket->socket, &msg, flags);
+        PerlZMQ_trace(" + zmq recv with flags %d", flags);
+        PerlZMQ_trace(" + zmq_recv returned with rv '%d'", rv);
         if (rv != 0) {
             SET_BANG;
             zmq_msg_close(&msg);
-            PerlZMQ_trace("zmq_recv got bad status, closing temporary message");
+            PerlZMQ_trace(" + zmq_recv got bad status, closing temporary message");
         } else {
             Newxz(RETVAL, 1, PerlZMQ_Raw_Message);
             zmq_msg_init(RETVAL);
             zmq_msg_copy( RETVAL, &msg );
             zmq_msg_close(&msg);
-            PerlZMQ_trace("zmq_recv created message %p", RETVAL );
+            PerlZMQ_trace(" + zmq_recv created message %p", RETVAL );
         }
     OUTPUT:
         RETVAL
@@ -434,7 +472,7 @@ PerlZMQ_Raw_zmq_send(socket, message, flags = 0)
                 croak("Got invalid message object");
             }
             
-            RETVAL = zmq_send(socket, msg, flags);
+            RETVAL = zmq_send(socket->socket, msg, flags);
         } else {
             STRLEN data_len;
             char *x_data;
@@ -444,7 +482,7 @@ PerlZMQ_Raw_zmq_send(socket, message, flags = 0)
             Newxz(x_data, data_len, char);
             Copy(data, x_data, data_len, char);
             zmq_msg_init_data(&msg, x_data, data_len, PerlZMQ_free_string, NULL);
-            RETVAL = zmq_send(socket, &msg, flags);
+            RETVAL = zmq_send(socket->socket, &msg, flags);
             zmq_msg_close( &msg ); 
         }
     OUTPUT:
@@ -470,7 +508,7 @@ PerlZMQ_Raw_zmq_getsockopt(sock, option)
             case ZMQ_BACKLOG:
             case ZMQ_FD:
                 len = sizeof(i);
-                status = zmq_getsockopt(sock, option, &i, &len);
+                status = zmq_getsockopt(sock->socket, option, &i, &len);
                 if(status == 0)
                     RETVAL = newSViv(i);
                 break;
@@ -481,7 +519,7 @@ PerlZMQ_Raw_zmq_getsockopt(sock, option)
             case ZMQ_RECOVERY_IVL:
             case ZMQ_MCAST_LOOP:
                 len = sizeof(i64);
-                status = zmq_getsockopt(sock, option, &i64, &len);
+                status = zmq_getsockopt(sock->socket, option, &i64, &len);
                 if(status == 0)
                     RETVAL = newSViv(i64);
                 break;
@@ -491,21 +529,21 @@ PerlZMQ_Raw_zmq_getsockopt(sock, option)
             case ZMQ_SNDBUF:
             case ZMQ_RCVBUF:
                 len = sizeof(u64);
-                status = zmq_getsockopt(sock, option, &u64, &len);
+                status = zmq_getsockopt(sock->socket, option, &u64, &len);
                 if(status == 0)
                     RETVAL = newSVuv(u64);
                 break;
 
             case ZMQ_EVENTS:
                 len = sizeof(i32);
-                status = zmq_getsockopt(sock, option, &i32, &len);
+                status = zmq_getsockopt(sock->socket, option, &i32, &len);
                 if(status == 0)
                     RETVAL = newSViv(i32);
                 break;
 
             case ZMQ_IDENTITY:
                 len = sizeof(buf);
-                status = zmq_getsockopt(sock, option, &buf, &len);
+                status = zmq_getsockopt(sock->socket, option, &buf, &len);
                 if(status == 0)
                     RETVAL = newSVpvn(buf, len);
                 break;
@@ -545,7 +583,7 @@ PerlZMQ_Raw_zmq_setsockopt(sock, option, value)
             case ZMQ_SUBSCRIBE:
             case ZMQ_UNSUBSCRIBE:
                 ptr = SvPV(value, len);
-                RETVAL = zmq_setsockopt(sock, option, ptr, len);
+                RETVAL = zmq_setsockopt(sock->socket, option, ptr, len);
                 break;
 
             case ZMQ_SWAP:
@@ -553,7 +591,7 @@ PerlZMQ_Raw_zmq_setsockopt(sock, option, value)
             case ZMQ_RECOVERY_IVL:
             case ZMQ_MCAST_LOOP:
                 i64 = SvIV(value);
-                RETVAL = zmq_setsockopt(sock, option, &i64, sizeof(int64_t));
+                RETVAL = zmq_setsockopt(sock->socket, option, &i64, sizeof(int64_t));
                 break;
 
             case ZMQ_HWM:
@@ -561,18 +599,18 @@ PerlZMQ_Raw_zmq_setsockopt(sock, option, value)
             case ZMQ_SNDBUF:
             case ZMQ_RCVBUF:
                 u64 = SvUV(value);
-                RETVAL = zmq_setsockopt(sock, option, &u64, sizeof(uint64_t));
+                RETVAL = zmq_setsockopt(sock->socket, option, &u64, sizeof(uint64_t));
                 break;
 
             case ZMQ_LINGER:
                 i = SvIV(value);
-                RETVAL = zmq_setsockopt(sock, option, &i, sizeof(i));
+                RETVAL = zmq_setsockopt(sock->socket, option, &i, sizeof(i));
                 break;
 
             default:
                 warn("Unknown sockopt type %d, assuming string.  Send patch", option);
                 ptr = SvPV(value, len);
-                RETVAL = zmq_setsockopt(sock, option, ptr, len);
+                RETVAL = zmq_setsockopt(sock->socket, option, ptr, len);
         }
     OUTPUT:
         RETVAL
@@ -621,7 +659,8 @@ PerlZMQ_Raw_zmq_poll( list, timeout = 0 )
                     croak("Invalid 'socket' given for index %d", i);
                 }
                 mg = PerlZMQ_Raw_Socket_mg_find( aTHX_ SvRV(*svr), &PerlZMQ_Raw_Socket_vtbl );
-                pollitems[i].socket = mg->mg_ptr;
+                pollitems[i].socket = ((PerlZMQ_Raw_Socket *) mg->mg_ptr)->socket;
+                PerlZMQ_trace( " + pollitem[%d].socket = %p", i, pollitems[i].socket );
             } else {
                 svr = hv_fetch( elm, "fd", 2, NULL );
                 if (svr == NULL || ! SvOK(*svr) || SvTYPE(*svr) != SVt_IV) {
@@ -678,7 +717,7 @@ PerlZMQ_Raw_zmq_device( device, insocket, outsocket )
         PerlZMQ_Raw_Socket *insocket;
         PerlZMQ_Raw_Socket *outsocket;
     CODE:
-        RETVAL = zmq_device( device, insocket, outsocket );
+        RETVAL = zmq_device( device, insocket->socket, outsocket->socket );
     OUTPUT:
         RETVAL
 
