@@ -32,7 +32,7 @@ BEGIN {
 # XXX ZMQ_NOBLOCK needs to be deprecated, but doing this for compat
 # for now... we need to get rid of it when we release it
 if ( ZMQ_VERSION_MAJOR >= 3 ) {
-    *ZMQ_VERSION = \&ZMQ_DONTWAIT;
+    *ZMQ_NOBLOCK = \&ZMQ_DONTWAIT;
 }
 
 our %EXPORT_TAGS = (
