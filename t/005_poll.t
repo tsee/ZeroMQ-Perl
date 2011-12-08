@@ -1,6 +1,6 @@
 use strict;
 use Test::More;
-use Test::Exception;
+use Test::Fatal;
 
 BEGIN {
     use_ok "ZeroMQ::Raw";
@@ -10,7 +10,7 @@ BEGIN {
 subtest 'basic poll with fd' => sub {
     SKIP: {
         skip "Can't poll using fds on Windows", 2 if ($^O eq 'MSWin32');
-        lives_ok {
+        is exception {
             my $called = 0;
             zmq_poll([
                 {
@@ -20,7 +20,7 @@ subtest 'basic poll with fd' => sub {
                 }
             ], 1);
             ok $called, "callback called";
-        } "PollItem doesn't die";
+        }, undef, "PollItem doesn't die";
     }
 };
 
@@ -29,7 +29,7 @@ subtest 'poll with zmq sockets' => sub {
     my $req = zmq_socket( $ctxt, ZMQ_REQ );
     my $rep = zmq_socket( $ctxt, ZMQ_REP );
     my $called = 0;
-    lives_ok {
+    is exception {
         zmq_bind( $rep, "inproc://polltest");
         zmq_connect( $req, "inproc://polltest");
         zmq_send( $req, "Test");
@@ -41,7 +41,7 @@ subtest 'poll with zmq sockets' => sub {
                 callback => sub { $called++ }
             },
         ], 1);
-    } "PollItem correctly handles callback";
+    }, undef, "PollItem correctly handles callback";
 
     is $called, 1;
 };

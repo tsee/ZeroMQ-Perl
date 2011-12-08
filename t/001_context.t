@@ -1,6 +1,6 @@
 use strict;
 use Test::More;
-use Test::Exception;
+use Test::Fatal;
 BEGIN {
     use_ok "ZeroMQ::Raw", qw(
         zmq_init
@@ -8,11 +8,11 @@ BEGIN {
     );
 }
 
-lives_ok {
+is exception {
     my $context = zmq_init(5);
     isa_ok $context, "ZeroMQ::Raw::Context";
     zmq_term( $context );
-} "sane allocation / cleanup for context";
+}, undef, "sane allocation / cleanup for context";
 
 # Should probably run this test under valgrind to make sure
 # we're not leaking memory

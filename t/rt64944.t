@@ -13,63 +13,63 @@ BEGIN {
 }
 
 subtest 'blocking recv' => sub {
-    test_tcp(
-        client => sub {
-            my $port = shift;
-            my $ctxt = ZeroMQ::Context->new();
-            my $sock = $ctxt->socket(ZMQ_SUB);
-    
-            $sock->connect("tcp://127.0.0.1:$port" );
-            $sock->setsockopt(ZMQ_SUBSCRIBE, '');
-    
-            for(1..10) {
-                my $msg = $sock->recv();
-                is $msg->data(), $_;
-            }
-        },
-        server => sub {
-            my $port = shift;
-            my $ctxt = ZeroMQ::Context->new();
-            my $sock = $ctxt->socket(ZMQ_PUB);
-    
-            $sock->bind("tcp://127.0.0.1:$port");
-            sleep 2;
-            for (1..10) {
-                $sock->send($_);
-            }
-            sleep 2;
+    my $server = Test::TCP->new(code => sub {
+        my $port = shift;
+        note "START blocking recv server on port $port";
+        my $ctxt = ZeroMQ::Context->new();
+        my $sock = $ctxt->socket(ZMQ_PUB);
+
+        $sock->bind("tcp://127.0.0.1:$port");
+        sleep 2;
+        for (1..10) {
+            $sock->send($_);
         }
-    );
+        sleep 2;
+        note "END blocking recv server";
+        $sock->close;
+    });
+
+    my $port = $server->port;
+    my $ctxt = ZeroMQ::Context->new();
+    my $sock = $ctxt->socket(ZMQ_SUB);
+
+    note "blocking recv client connecting to port $port";
+    $sock->connect("tcp://127.0.0.1:$port" );
+    $sock->setsockopt(ZMQ_SUBSCRIBE, '');
+
+    for(1..10) {
+        my $msg = $sock->recv();
+        is $msg->data(), $_;
+    }
 };
-    
+
 subtest 'non-blocking recv (fail)' => sub {
-    test_tcp(
-        client => sub {
-            my $port = shift;
-            my $ctxt = ZeroMQ::Context->new();
-            my $sock = $ctxt->socket(ZMQ_SUB);
+    my $server = Test::TCP->new(code => sub {
+        my $port = shift;
+        my $ctxt = ZeroMQ::Context->new();
+        my $sock = $ctxt->socket(ZMQ_PUB);
     
-            $sock->connect("tcp://127.0.0.1:$port" );
-            $sock->setsockopt(ZMQ_SUBSCRIBE, '');
-    
-            for(1..10) {
-                my $msg = $sock->recv(ZMQ_RCVMORE); # most of this call should really fail
-            }
-            ok(1); # dummy - this is just here to find leakage
-        },
-        server => sub {
-            my $port = shift;
-            my $ctxt = ZeroMQ::Context->new();
-            my $sock = $ctxt->socket(ZMQ_PUB);
-    
-            $sock->bind("tcp://127.0.0.1:$port");
-            sleep 2;
-            for (1..10) {
-                $sock->send($_);
-            }
-            sleep 2;
+        $sock->bind("tcp://127.0.0.1:$port");
+        sleep 2;
+        for (1..10) {
+            $sock->send($_);
         }
-    );
+        sleep 2;
+    } );
+
+    my $port = $server->port;
+
+    note "non-blocking client connecting to port $port";
+    my $ctxt = ZeroMQ::Context->new();
+    my $sock = $ctxt->socket(ZMQ_SUB);
+
+    $sock->connect("tcp://127.0.0.1:$port" );
+    $sock->setsockopt(ZMQ_SUBSCRIBE, '');
+
+    for(1..10) {
+        my $msg = $sock->recv(ZMQ_RCVMORE); # most of this call should really fail
+    }
+    ok(1); # dummy - this is just here to find leakage
 };
 
 # Code excericising zmq_poll to do non-blocking recv()

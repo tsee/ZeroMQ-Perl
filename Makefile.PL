@@ -43,9 +43,9 @@ assertlibs
 repository 'http://github.com/lestrrat/ZeroMQ-Perl';
 requires 'Task::Weaken';
 test_requires 'Test::More', '0.98';
-test_requires 'Test::TCP';
+test_requires 'Test::TCP' => '1.08';
 test_requires 'Test::Requires';
-test_requires 'Test::Exception' => '0.29';
+test_requires 'Test::Fatal';
 recommends 'JSON' => '2.00';
 use_xshelper '-clean';
 
