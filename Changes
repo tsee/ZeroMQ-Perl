@@ -1,5 +1,12 @@
 Changelog for Perl module ZeroMQ.
 
+0.19 Dec 08 2011
+  - Fix socket/context destruction order (github #20).
+  - Apply doc patches.
+  - Make ZMQ_NOBLOCK to ZMQ_DONTWAIT when libzmq >= 3
+  - Change tests to using Test::Fatal instead of Test::Exception
+  - Change tests to using Test::TCP object interface
+
 0.18 Nov 06 2011
   - Pass $flags in ZeroMQ::Socket->recv_as() as is documented
 
