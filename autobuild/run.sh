@@ -5,6 +5,8 @@
 ABSPATH=$(cd ${0%/*} && echo $PWD/${0##*/})
 THISDIR=$(dirname $ABSPATH)
 
+PERL5OPT="-Mlib=extlib/lib/perl5"
+
 [ -z $MAKE ] && MAKE=$(which make)
 [ -z $PERL ] && PERL=$(which perl)
 
@@ -16,8 +18,9 @@ $PERL $THISDIR/cpanm -l extlib Module::Install::CheckLib
 $PERL $THISDIR/cpanm -l extlib Module::Install::ReadmeFromPod
 $PERL $THISDIR/cpanm -l extlib Module::Install::TestTarget
 $PERL $THISDIR/cpanm -l extlib Module::Install::XSUtil
+$PERL $THISDIR/cpanm -l extlib Module::Install::XSUtil
 
-$PERL -I$THISDIR/extlib/lib -Mlocal::lib=extlib Makefile.PL
-$PERL -I$THISDIR/extlib/lib -Mlocal::lib=extlib $THISDIR/cpanm --installdeps -L extlib .
+$PERL Makefile.PL
+$PERL $THISDIR/cpanm --installdeps -L extlib .
 
 $MAKE test
