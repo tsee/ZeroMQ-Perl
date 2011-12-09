@@ -30,7 +30,7 @@ modules first:
 EOM
     foreach my $module (@missing) {
         $module =~ s/^inc:://;
-        print "    * $module\n";
+        print STDERR "    * $module\n";
     }
     print STDERR <<EOM;
 and try again.
@@ -38,7 +38,7 @@ and try again.
 While you're at it, install these modules as they are needed to run
 the tests:
 
-* Test::Exception (at least 0.29)
+* Test::Fatal
 * Test::Requires
 * Test::TCP
 * Devel::CheckLib
