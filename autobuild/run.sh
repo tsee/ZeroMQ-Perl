@@ -19,6 +19,9 @@ $PERL $THISDIR/cpanm -l extlib Module::Install::ReadmeFromPod
 $PERL $THISDIR/cpanm -l extlib Module::Install::TestTarget
 $PERL $THISDIR/cpanm -l extlib Module::Install::XSUtil
 
+# for explicitly testing
+$PERL $THISDIR/cpanm -l extlib AnyEvent
+
 $PERL Makefile.PL
 $PERL $THISDIR/cpanm --installdeps -lextlib .
 
