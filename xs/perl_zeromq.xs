@@ -2,7 +2,12 @@
 #include "xshelper.h"
 
 #if (PERLZMQ_TRACE > 0)
-#define PerlZMQ_trace(...) warn(__VA_ARGS__)
+#define PerlZMQ_trace(...) \
+    { \
+        PerlIO_printf(PerlIO_stderr(), "[perlzmq] "); \
+        PerlIO_printf(PerlIO_stderr(), __VA_ARGS__); \
+        PerlIO_printf(PerlIO_stderr(), "\n"); \
+    }
 #else
 #define PerlZMQ_trace(...)
 #endif
@@ -32,12 +37,15 @@ PerlZMQ_Raw_Message_mg_dup(pTHX_ MAGIC* const mg, CLONE_PARAMS* const param) {
 STATIC_INLINE int
 PerlZMQ_Raw_Message_mg_free( pTHX_ SV * const sv, MAGIC *const mg ) {
     PerlZMQ_Raw_Message* const msg = (PerlZMQ_Raw_Message *) mg->mg_ptr;
-    PerlZMQ_trace("Message_mg_free for SV = %p, zmq_msg_t = %p", sv, msg);
+
     PERL_UNUSED_VAR(sv);
+    PerlZMQ_trace( "START mg_free (Message)" );
     if ( msg != NULL ) {
+        PerlZMQ_trace( " + zmq message %p", msg );
         zmq_msg_close( msg );
         Safefree( msg );
     }
+    PerlZMQ_trace( "END mg_free (Message)" );
     return 1;
 }
 
@@ -67,15 +75,16 @@ PerlZMQ_Raw_Context_mg_free( pTHX_ SV * const sv, MAGIC *const mg ) {
     PerlZMQ_trace("START mg_free (Context)");
     if (ctxt != NULL) {
 #ifdef USE_ITHREADS
+        PerlZMQ_trace( " + thread enabled. thread %p", aTHX );
+        PerlZMQ_trace( " + context wrapper %p with zmq context %p", ctxt, ctxt->ctxt );
         if ( ctxt->interp == aTHX ) { /* is where I came from */
-            PerlZMQ_trace("Context_free for context wrapper %p with zmq context %p for thread %p", ctxt, ctxt->ctxt, aTHX);
+            PerlZMQ_trace( " + detected mg_free from creating thread %p, cleaning up", aTHX );
             zmq_term( ctxt->ctxt );
             mg->mg_ptr = NULL;
             Safefree(ctxt);
         }
 #else
         PerlZMQ_trace(" + zmq context %p", ctxt);
-        PerlZMQ_trace(" + are we in global destruction? %s", PL_dirty ? "YES" : "NO");
         zmq_term( ctxt );
         mg->mg_ptr = NULL;
 #endif
@@ -187,6 +196,11 @@ MODULE = ZeroMQ    PACKAGE = ZeroMQ   PREFIX = PerlZMQ_
 
 PROTOTYPES: DISABLED
 
+BOOT:
+    {
+        PerlZMQ_trace( "Booting Perl ZeroMQ" );
+    }
+
 void
 PerlZMQ_version()
     PREINIT:
@@ -224,14 +238,19 @@ PerlZMQ_Raw_zmq_init( nthreads = 5 )
     PREINIT:
         SV *class_sv = sv_2mortal(newSVpvn( "ZeroMQ::Raw::Context", 20 ));
     CODE:
+        PerlZMQ_trace( "START zmq_init" );
 #ifdef USE_ITHREADS
+        PerlZMQ_trace( " + threads enabled, aTHX %p", aTHX );
         Newxz( RETVAL, 1, PerlZMQ_Raw_Context );
         RETVAL->interp = aTHX;
         RETVAL->ctxt   = zmq_init( nthreads );
-        PerlZMQ_trace("context create context wrapper %p with zmq context %p for thread %p", RETVAL, RETVAL->ctxt, aTHX);
+        PerlZMQ_trace( " + created context wrapper %p", RETVAL );
+        PerlZMQ_trace( " + zmq context %p", RETVAL->ctxt );
 #else
+        PerlZMQ_trace( " + non-threaded context");
         RETVAL = zmq_init( nthreads );
 #endif
+        PerlZMQ_trace( "END zmq_init");
     OUTPUT:
         RETVAL
 
@@ -366,17 +385,21 @@ PerlZMQ_Raw_zmq_socket (ctxt, type)
     PREINIT:
         SV *class_sv = sv_2mortal(newSVpvn( "ZeroMQ::Raw::Socket", 19 ));
     CODE:
+        PerlZMQ_trace( "START zmq_socket" );
         Newxz( RETVAL, 1, PerlZMQ_Raw_Socket );
         RETVAL->assoc_ctxt = NULL;
         RETVAL->socket = NULL;
 #ifdef USE_ITHREADS
+        PerlZMQ_trace( " + context wrapper %p, zmq context %p", ctxt, ctxt->ctxt );
         RETVAL->socket = zmq_socket( ctxt->ctxt, type );
 #else
+        PerlZMQ_trace( " + zmq context %p", ctxt );
         RETVAL->socket = zmq_socket( ctxt, type );
 #endif
         RETVAL->assoc_ctxt = ST(0);
         SvREFCNT_inc(RETVAL->assoc_ctxt);
-        PerlZMQ_trace( "zmq_socket: created socket %p for context %p", RETVAL, ctxt );
+        PerlZMQ_trace( " + created socket %p", RETVAL );
+        PerlZMQ_trace( "END zmq_socket" );
     OUTPUT:
         RETVAL
 
@@ -401,11 +424,13 @@ PerlZMQ_Raw_zmq_connect(socket, addr)
         PerlZMQ_Raw_Socket *socket;
         char *addr;
     CODE:
-        PerlZMQ_trace( "zmq_connect: socket %p", socket );
+        PerlZMQ_trace( "START zmq_connect" );
+        PerlZMQ_trace( " + socket %p", socket );
         RETVAL = zmq_connect( socket->socket, addr );
         if (RETVAL != 0) {
             croak( "%s", zmq_strerror( zmq_errno() ) );
         }
+        PerlZMQ_trace( "END zmq_connect" );
     OUTPUT:
         RETVAL
 
