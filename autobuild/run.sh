@@ -18,9 +18,8 @@ $PERL $THISDIR/cpanm -l extlib Module::Install::CheckLib
 $PERL $THISDIR/cpanm -l extlib Module::Install::ReadmeFromPod
 $PERL $THISDIR/cpanm -l extlib Module::Install::TestTarget
 $PERL $THISDIR/cpanm -l extlib Module::Install::XSUtil
-$PERL $THISDIR/cpanm -l extlib Module::Install::XSUtil
 
 $PERL Makefile.PL
-$PERL $THISDIR/cpanm --installdeps -L extlib .
+$PERL $THISDIR/cpanm --installdeps -lextlib .
 
 $MAKE test
