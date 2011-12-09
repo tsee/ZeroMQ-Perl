@@ -5,5 +5,5 @@ use Test::Requires;
 test_requires 'Test::Pod::Coverage';
 
 Test::Pod::Coverage::all_pod_coverage_ok({
-    trustme => [ 'BUILD' ]
+    trustme => [ qr/^[A-Z_]+$/ ],
 });
