@@ -5,7 +5,7 @@
 ABSPATH=$(cd ${0%/*} && echo $PWD/${0##*/})
 THISDIR=$(dirname $ABSPATH)
 
-PERL5OPT="-Mlib=extlib/lib/perl5"
+export PERL5OPT="-Mlib=extlib/lib/perl5"
 
 [ -z $MAKE ] && MAKE=$(which make)
 [ -z $PERL ] && PERL=$(which perl)
