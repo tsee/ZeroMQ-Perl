@@ -363,8 +363,14 @@ int
 PerlZMQ_Raw_zmq_msg_close(message)
         PerlZMQ_Raw_Message *message;
     CODE:
+        PerlZMQ_trace("START zmq_msg_close");
         RETVAL = zmq_msg_close(message);
         Safefree(message);
+        {
+            MAGIC *mg =
+                 PerlZMQ_Raw_Message_mg_find( aTHX_ SvRV(ST(0)), &PerlZMQ_Raw_Message_vtbl );
+             mg->mg_ptr = NULL;
+        }
         /* mark the original SV's _closed flag as true */
         {
             SV *svr = SvRV(ST(0));
@@ -372,6 +378,7 @@ PerlZMQ_Raw_zmq_msg_close(message)
                 croak("PANIC: Failed to store closed flag on blessed reference");
             }
         }
+        PerlZMQ_trace("END zmq_msg_close");
     OUTPUT:
         RETVAL
 
