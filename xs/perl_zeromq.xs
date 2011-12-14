@@ -273,7 +273,9 @@ PerlZMQ_Raw_zmq_term( context )
         /* mark the original SV's _closed flag as true */
         {
             SV *svr = SvRV(ST(0));
-            hv_stores( (HV *) svr, "_closed", &PL_sv_yes );
+            if (hv_stores( (HV *) svr, "_closed", &PL_sv_yes ) == NULL) {
+                croak("PANIC: Failed to store closed flag on blessed reference");
+            }
         }
     OUTPUT:
         RETVAL
@@ -366,7 +368,9 @@ PerlZMQ_Raw_zmq_msg_close(message)
         /* mark the original SV's _closed flag as true */
         {
             SV *svr = SvRV(ST(0));
-            hv_stores( (HV *) svr, "_closed", &PL_sv_yes );
+            if (hv_stores( (HV *) svr, "_closed", &PL_sv_yes ) == NULL) {
+                croak("PANIC: Failed to store closed flag on blessed reference");
+            }
         }
     OUTPUT:
         RETVAL
@@ -431,7 +435,9 @@ PerlZMQ_Raw_zmq_close(socket)
         /* mark the original SV's _closed flag as true */
         {
             SV *svr = SvRV(ST(0));
-            hv_stores( (HV *) svr, "_closed", &PL_sv_yes );
+            if (hv_stores( (HV *) svr, "_closed", &PL_sv_yes ) == NULL) {
+                croak("PANIC: Failed to store closed flag on blessed reference");
+            }
         }
     OUTPUT:
         RETVAL
