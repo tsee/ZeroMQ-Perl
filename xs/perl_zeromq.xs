@@ -269,6 +269,12 @@ PerlZMQ_Raw_zmq_term( context )
                 PerlZMQ_Raw_Context_mg_find( aTHX_ SvRV(ST(0)), &PerlZMQ_Raw_Context_vtbl );
             mg->mg_ptr = NULL;
         }
+
+        /* mark the original SV's _closed flag as true */
+        {
+            SV *svr = SvRV(ST(0));
+            hv_stores( (HV *) svr, "_closed", &PL_sv_yes );
+        }
     OUTPUT:
         RETVAL
 
@@ -357,6 +363,11 @@ PerlZMQ_Raw_zmq_msg_close(message)
     CODE:
         RETVAL = zmq_msg_close(message);
         Safefree(message);
+        /* mark the original SV's _closed flag as true */
+        {
+            SV *svr = SvRV(ST(0));
+            hv_stores( (HV *) svr, "_closed", &PL_sv_yes );
+        }
     OUTPUT:
         RETVAL
 
@@ -415,6 +426,12 @@ PerlZMQ_Raw_zmq_close(socket)
             MAGIC *mg =
                  PerlZMQ_Raw_Socket_mg_find( aTHX_ SvRV(ST(0)), &PerlZMQ_Raw_Socket_vtbl );
              mg->mg_ptr = NULL;
+        }
+
+        /* mark the original SV's _closed flag as true */
+        {
+            SV *svr = SvRV(ST(0));
+            hv_stores( (HV *) svr, "_closed", &PL_sv_yes );
         }
     OUTPUT:
         RETVAL

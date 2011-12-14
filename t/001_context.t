@@ -8,13 +8,18 @@ BEGIN {
     );
 }
 
-is exception {
-    my $context = zmq_init(5);
-    isa_ok $context, "ZeroMQ::Raw::Context";
-    zmq_term( $context );
-}, undef, "sane allocation / cleanup for context";
+subtest 'sane creation/destroy' => sub {
+    is exception {
+        my $context = zmq_init(5);
+        isa_ok $context, "ZeroMQ::Raw::Context";
+        zmq_term( $context );
+    }, undef, "sane allocation / cleanup for context";
 
-# Should probably run this test under valgrind to make sure
-# we're not leaking memory
+    is exception {
+        my $context = zmq_init();
+        zmq_term( $context );
+        zmq_term( $context );
+    }, undef, "double zmq_term should not die";
+};
 
 done_testing;

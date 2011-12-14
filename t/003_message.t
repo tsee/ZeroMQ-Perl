@@ -10,6 +10,7 @@ BEGIN {
         zmq_msg_size
         zmq_msg_copy
         zmq_msg_move
+        zmq_msg_close
     );
 }
 
@@ -20,6 +21,12 @@ subtest "sane allocation / cleanup for message" => sub {
         is zmq_msg_data( $msg ), '', "no message data";
         is zmq_msg_size( $msg ), 0, "data size is 0";
     }, undef, "code lives";
+
+    is exception {
+        my $msg = zmq_msg_init();
+        zmq_msg_close($msg);
+        zmq_msg_close($msg);
+    }, undef, "double close should not die";
 };
 
 subtest "sane allocation / cleanup for message (init_data)" => sub {

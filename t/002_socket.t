@@ -13,6 +13,7 @@ BEGIN {
         zmq_close
         zmq_init
         zmq_socket
+        zmq_close
     );
 }
 
@@ -29,6 +30,13 @@ subtest 'simple creation and destroy' => sub {
         isa_ok $socket, "ZeroMQ::Raw::Socket";
         zmq_close( $socket );
     }, undef, "socket create, then zmq_close";
+
+    is exception {
+        my $context = zmq_init();
+        my $socket  = zmq_socket( $context, ZMQ_REP );
+        zmq_close( $socket );
+        zmq_close( $socket );
+    }, undef, "double zmq_close should not die";
 };
 
 subtest 'connect to a non-existent addr' => sub {

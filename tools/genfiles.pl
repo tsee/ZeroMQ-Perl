@@ -147,11 +147,33 @@ $typemap_type
     {
         MAGIC *mg;
         \$var = NULL;
-        if (sv_isobject(\$arg)) {
-            mg = ${c_type}_mg_find(aTHX_ SvRV(\$arg), &${c_type}_vtbl);
-            if (mg) {
-                \$var = ($c_type *) mg->mg_ptr;
+        if (! sv_isobject(\$arg)) {
+            croak(\\"Argument is not an object\\");
+        }
+
+        /* if it got here, it's a blessed reference. better be an HV */
+        {
+            SV *svr;
+            SV **closed;
+            svr = SvRV(\$arg);
+            if (! svr ) {
+                croak(\\"PANIC: Could not get reference from blessed object.\\");
             }
+
+            if (SvTYPE(svr) != SVt_PVHV) {
+                croak(\\"PANIC: Underlying storage of blessed reference is not a hash.\\");
+            }
+
+            closed = hv_fetchs( (HV *) svr, \\"_closed\\", 0 );
+            if (closed != NULL && SvTRUE(*closed)) {
+                /* if it's already closed, just return */
+                XSRETURN_EMPTY;
+            }
+        }
+
+        mg = ${c_type}_mg_find(aTHX_ SvRV(\$arg), &${c_type}_vtbl);
+        if (mg) {
+            \$var = ($c_type *) mg->mg_ptr;
         }
 
         if (\$var == NULL)
