@@ -648,7 +648,12 @@ PerlZMQ_Raw_zmq_setsockopt(sock, option, value)
 
             case ZMQ_SWAP:
             case ZMQ_RATE:
-            case ZMQ_RECOVERY_IVL:
+#ifdef ZMQ_RECONNECT_IVL
+            case ZMQ_RECONNECT_IVL:
+#endif
+#ifdef ZMQ_RECONNECT_IVL_MAX
+            case ZMQ_RECONNECT_IVL_MAX:
+#endif
             case ZMQ_MCAST_LOOP:
                 i64 = SvIV(value);
                 RETVAL = zmq_setsockopt(sock->socket, option, &i64, sizeof(int64_t));
