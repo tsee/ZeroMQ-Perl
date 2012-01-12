@@ -1,5 +1,13 @@
 Changelog for Perl module ZeroMQ.
 
+0.20 Jan 12 2012
+  - Fix recv_as to return undef when ZMQ_NOBLOCK is specified
+    (https://github.com/lestrrat/ZeroMQ-Perl/pull/31 by sebnow)
+  - Make sure to not double-free C structures when explicit closing
+    has been performed
+  - Add ZMQ_RECONNECT_IVL_MAX in get/setsopckopt
+  - Tweak automated tests
+
 0.19 Dec 08 2011
   - Fix socket/context destruction order (github #20).
   - Apply doc patches.
