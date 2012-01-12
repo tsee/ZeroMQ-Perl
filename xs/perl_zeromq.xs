@@ -559,7 +559,12 @@ PerlZMQ_Raw_zmq_getsockopt(sock, option)
         switch(option){
             case ZMQ_TYPE:
             case ZMQ_LINGER:
+#ifdef ZMQ_RECONNECT_IVL
             case ZMQ_RECONNECT_IVL:
+#endif
+#ifdef ZMQ_RECONNECT_IVL_MAX
+            case ZMQ_RECONNECT_IVL_MAX:
+#endif
             case ZMQ_BACKLOG:
             case ZMQ_FD:
                 len = sizeof(i);

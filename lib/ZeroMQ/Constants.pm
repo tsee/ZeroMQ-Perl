@@ -12,6 +12,7 @@ BEGIN {
         ZMQ_LINGER
         ZMQ_EVENTS
         ZMQ_RECONNECT_IVL
+        ZMQ_RECONNECT_IVL_MAX
         ZMQ_SWAP
         ZMQ_TYPE
         ZMQ_VERSION
@@ -73,6 +74,7 @@ our %EXPORT_TAGS = (
         ZMQ_UNSUBSCRIBE
         ZMQ_RATE
         ZMQ_RECOVERY_IVL
+        ZMQ_RECOVERY_IVL_MAX
         ZMQ_MCAST_LOOP
         ZMQ_SNDBUF
         ZMQ_RCVBUF
