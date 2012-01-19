@@ -299,6 +299,24 @@ The callback receives the data received from the socket.
 Register a write callback for a given C<$name>. This is used in C<send_as()>
 The callback receives the Perl structure given to C<send_as()>
 
+=head1 DEBUGGING XS
+
+If you see segmentation faults, and such, you need to figure out where the error is occuring in order for the maintainers to figure out what happened. Here's a very very brief explanation of steps involved.
+
+First, make sure to compile ZeroMQ.pm with debugging on by specifying -g:
+
+    perl Makefile.PL -g
+    make
+
+Then fire gdb:
+
+    gdb perl
+    (gdb) R -Mblib /path/to/your/script.pl
+
+When you see the crash, get a backtrace:
+
+    (gdb) bt
+
 =head1 CAVEATS
 
 This is an early release. Proceed with caution, please report
