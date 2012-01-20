@@ -48,6 +48,8 @@ our %EXPORT_TAGS = (
         ZMQ_XREP
         ZMQ_XSUB
         ZMQ_XPUB
+        ZMQ_ROUTER
+        ZMQ_DEALER
         ZMQ_PULL
         ZMQ_PUSH
         ZMQ_UPSTREAM
@@ -159,6 +161,10 @@ The exportable constants are:
 =item ZMQ_XPUB
 
 =item ZMQ_XSUB
+
+=item ZMQ_ROUTER
+
+=item ZMQ_DEALER
 
 =item ZMQ_PULL
 
