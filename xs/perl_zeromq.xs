@@ -186,7 +186,7 @@ PerlZMQ_Raw_Socket_mg_find(pTHX_ SV* const sv, const MGVTBL* const vtbl){
 
 STATIC_INLINE void 
 PerlZMQ_free_string(void *data, void *hint) {
-    PERL_UNUSED_VAR(hint);
+    PERL_SET_CONTEXT(hint);
     Safefree( (char *) data );
 }
 
@@ -330,7 +330,7 @@ PerlZMQ_Raw_zmq_msg_init_data( data, size = -1)
         Newxz( RETVAL, 1, PerlZMQ_Raw_Message );
         Newxz( x_data, x_data_len, char );
         Copy( sv_data, x_data, x_data_len, char );
-        rc = zmq_msg_init_data(RETVAL, x_data, x_data_len, PerlZMQ_free_string, NULL);
+        rc = zmq_msg_init_data(RETVAL, x_data, x_data_len, PerlZMQ_free_string, Perl_get_context());
         if ( rc != 0 ) {
             SET_BANG;
             zmq_msg_close( RETVAL );
@@ -536,7 +536,7 @@ PerlZMQ_Raw_zmq_send(socket, message, flags = 0)
 
             Newxz(x_data, data_len, char);
             Copy(data, x_data, data_len, char);
-            zmq_msg_init_data(&msg, x_data, data_len, PerlZMQ_free_string, NULL);
+            zmq_msg_init_data(&msg, x_data, data_len, PerlZMQ_free_string, Perl_get_context());
             RETVAL = zmq_send(socket->socket, &msg, flags);
             zmq_msg_close( &msg ); 
         }
