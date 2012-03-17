@@ -55,11 +55,6 @@ our %EXPORT_TAGS = (
         ZMQ_UPSTREAM
         ZMQ_DOWNSTREAM
         ZMQ_BACKLOG
-        ZMQ_FD
-        ZMQ_LINGER
-        ZMQ_EVENTS
-        ZMQ_RECONNECT_IVL
-        ZMQ_TYPE
     ),
 # socket send/recv flags
     qw(
@@ -81,6 +76,12 @@ our %EXPORT_TAGS = (
         ZMQ_SNDBUF
         ZMQ_RCVBUF
         ZMQ_RCVMORE
+        ZMQ_RECONNECT_IVL
+        ZMQ_RECONNECT_IVL_MAX
+        ZMQ_LINGER
+        ZMQ_FD
+        ZMQ_EVENTS
+        ZMQ_TYPE
     ),
 # i/o multiplexing
     qw(
@@ -184,6 +185,8 @@ The exportable constants are:
 
 =item ZMQ_RECONNECT_IVL
 
+=item ZMQ_RECONNECT_IVL_MAX
+
 =item ZMQ_TYPE
 
 =item ZMQ_NOBLOCK
@@ -219,6 +222,8 @@ The exportable constants are:
 =item ZMQ_POLLOUT
 
 =item ZMQ_POLLERR
+
+=item ZMQ_RECOVERY_IVL_MSEC
 
 =back
 
@@ -263,8 +268,6 @@ The exportable constants are:
 =item ZMQ_VERSION_MINOR
 
 =item ZMQ_VERSION_PATCH
-
-=item ZMQ_RECOVERY_IVL_MSEC
 
 =back
 
