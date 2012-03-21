@@ -37,7 +37,6 @@ EOM
         ZeroMQ::Raw::Context
         ZeroMQ::Raw::Socket
         ZeroMQ::Raw::Message
-        ZeroMQ::Raw::PollItem
     );
     foreach my $perl_type (@perl_types) {
         my $c_type = $perl_type;
