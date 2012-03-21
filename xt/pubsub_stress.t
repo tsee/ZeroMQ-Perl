@@ -41,8 +41,6 @@ sub run {
         zmq_send( $socket, $data );
     }
 
-    sleep 5;
-
     for my $prefix ( 0..9, 'A' ..'Z' ) {
         zmq_send( $socket, "$prefix-EXIT" );
     }
