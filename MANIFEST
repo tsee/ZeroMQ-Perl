@@ -4,8 +4,6 @@ eg/hello_server.pl
 eg/local_lat.pl
 eg/pubsub_client.pl
 eg/pubsub_server.pl
-eg/pushpull_client.pl
-eg/pushpull_server.pl
 eg/remote_lat.pl
 eg/thread_0mq.pl
 eg/threaded_client.pl
@@ -51,6 +49,7 @@ t/104_ipc.t
 t/105_poll.t
 t/cover.sh
 t/rt64944.t
+t/rt74653.t
 tools/check_mi_mods.pl
 tools/detect_zmq.pl
 tools/genfiles.pl
