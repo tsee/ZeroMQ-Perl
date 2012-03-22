@@ -1,5 +1,22 @@
 Changelog for Perl module ZeroMQ.
 
+0.21 Mar 22 2012
+  - Fix threading issues causing a segfault.
+    martyn-gillmore/aero did the diagnosis on Win32, but that fix still
+    caused problems in *nix, which showed a deeper problem. rafl provided
+    a new patch, and hopefully this will fix the problem. 
+        * Initial fix by martyn-gillmore/aero:
+            https://github.com/lestrrat/ZeroMQ-Perl/commit/baeb5233749233ced890141f5ab961fea1b1055d
+        * Additional fix by rafl:
+            https://github.com/lestrrat/ZeroMQ-Perl/commit/c9c7e0f1b98d7fc8336a612aa0b15f87964b3ef0
+  - Doc tweaks (smueller)
+  - Add ROUTER/DEALER
+  - HEADS UP: There are plans to ditch ZeroMQ.pm in favor of multiple
+    implementations, to provide more stability:
+        * https://github.com/lestrrat/p5-ZMQ/
+        * https://github.com/lestrrat/ZeroMQ-Perl/issues/36
+        * https://github.com/lestrrat/ZeroMQ-Perl/issues/35
+
 0.20 Jan 12 2012
   - Fix recv_as to return undef when ZMQ_NOBLOCK is specified
     (https://github.com/lestrrat/ZeroMQ-Perl/pull/31 by sebnow)
