@@ -60,6 +60,33 @@ subtest 'connect to a non-existent addr' => sub {
     }, undef, "check for proper handling of closed socket";
 };
 
+subtest 'github pull 33 (ZMQ_RECONNECT_IVL)' => sub {
+    SKIP: {
+        my $ok = 
+            ZeroMQ::Constants->can('ZMQ_RECONNECT_IVL') &&
+            ZeroMQ::Constants->can('ZMQ_RECONNECT_IVL_MAX')
+        ;
+        if (! $ok) {
+            skip 1, "ZMQ_RECONNET_IVL(_MAX) not available";
+        }
+    }
+
+    is exception {
+        my $ctx = ZeroMQ::Context->new;
+        my $sock = $ctx->socket(ZMQ_PUSH);
+
+        my %consts = (
+            ZMQ_RECONNCET_IVL => ZeroMQ::Constants::ZMQ_RECONNECT_IVL(),
+            ZMQ_RECONNCET_IVL_MAX => ZeroMQ::Constants::ZMQ_RECONNECT_IVL_MAX()
+        );
+        while ( my ($name, $value) = each %consts ) {
+            note "BEFORE: $name: " . $sock->getsockopt($value);
+            $sock->setsockopt( $value, 500 );
+            note "AFTER: $name: " . $sock->getsockopt($value);
+        }
+    }, undef, "no exception";
+};
+
 done_testing;
 
 __END__
