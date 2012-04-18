@@ -88,6 +88,10 @@ ZeroMQ::Raw - Low-level API for ZeroMQ
 Calls zmq_poll on the given items as specified by @list_of_hashrefs.
 Each element in @list_of_hashrefs should be a hashref containing the following keys:
 
+Returns undef on error (and sets $! in that case). Returns an array reference
+containing as many booleans as there are elements in C<@list_of_hashrefs>.
+These booleans indicate whether the socket in question has fired the callback.
+
 =over 4
 
 =item socket
